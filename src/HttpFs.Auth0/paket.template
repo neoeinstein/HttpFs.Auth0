@@ -1,0 +1,25 @@
+type project
+title
+    HttpFs.Auth0
+owners
+    Marcus Griep <marcus@griep.us>
+authors 
+    Marcus Griep <marcus@griep.us>
+projectUrl
+    https://github.com/neoeinstein/HttpFs.Auth0
+iconUrl
+    https://raw.githubusercontent.com/neoeinstein/HttpFs.Auth0/master/docs/files/img/logo.png
+licenseUrl
+    https://github.com/neoeinstein/HttpFs.Auth0/blob/master/LICENSE.txt
+requireLicenseAcceptance
+    false
+copyright
+    Copyright 2015
+tags
+    http auth0 authentication
+summary
+    Support for authentication patterns using Auth0
+description
+    Provides constructs which make it easier to use Auth0 when interacting with protected APIs.
+
+
