@@ -152,10 +152,26 @@ type AuthenticationRequest =
     *> Json.writeMixin x.Credentials
     *> Json.writeMixin x.Scope
 
-type AuthenticationFailure =
+type Auth0Error =
   { ErrorType : string
     Description : string
   }
+  static member FromJson (_ : Auth0Error) =
+    let (<!>) = Chiron.Operators.(<!>)
+    let (<*>) = Chiron.Operators.(<*>)
+    let mk e d =
+      { ErrorType = e
+        Description = d
+      }
+    mk
+    <!> Json.read "error"
+    <*> Json.read "error_description"
+
+type ApiFailure =
+  | ApiError of Auth0Error
+  | DeserializationError of string
+  | Exception of exn
+  | OperationTimedOut
 
 type AuthenticationResponse =
   { IdToken : JwtToken
@@ -180,8 +196,16 @@ type AuthenticationResponse =
 
 type AuthenticationResult =
   | AuthenticationSuccess of AuthenticationResponse
-  | AuthenticationFailed of AuthenticationFailure
-  | AuthenticationTimedOut
+  | AuthenticationFailed of ApiFailure
+  static member FromJson (_ : AuthenticationResult) =
+    let (<!>) = Chiron.Operators.(<!>)
+    let mk (idToken : string option) =
+      match idToken with
+      | Some _ ->
+        AuthenticationSuccess <!> Json.readMixin
+      | None ->
+        (AuthenticationFailed << ApiError) <!> Json.readMixin
+    Json.bind (Json.read "id_token") mk
 
 type DelegationCredentials =
   | IdTokenCred of JwtToken
@@ -210,7 +234,7 @@ type DelegationRequest =
     *> Json.writeMixin x.Scope
 
 type HttpRequestResult =
-  | AuthenticationRequired of Auth0Client
+  | AuthenticationRequired of Auth0Client * Response
   | UnhandledResponse of Response
 
 module WwwAuthenticate =
@@ -254,7 +278,7 @@ module Auth0Client =
 
   let splitKeyValuePair s =
     String.split '=' s |> function
-    | k :: v :: [] -> String.toLowerInvariant k, v
+    | [ k; v ] -> String.toLowerInvariant k, v
     | _ -> String.toLowerInvariant s, s
 
   let decomposeKeyValuePairs =
@@ -305,7 +329,7 @@ module Auth0Client =
       match resp with
       | HttpStatus 401 & HasAuth0WwwAuthenticate a0client ->
         printfn "got 401"
-        AuthenticationRequired a0client
+        AuthenticationRequired (a0client, resp)
       | _ ->
         printfn "got non-challenge response"
         UnhandledResponse resp
@@ -323,12 +347,31 @@ module Auth0Client =
   let getResponseWithAuth0OnChallenge (tryGetCredentials : Auth0Client -> Job<HttpAuthorizationToken option>) (req : Request) = job {
     let! result = knockOnFrontDoor req
     match result with
-    | AuthenticationRequired a0client ->
+    | AuthenticationRequired (a0client, resp) ->
       let! creds = tryGetCredentials a0client
-      return! getResponseWithAuth0Credentials (creds |> Option.get) req
+      printfn "Credential lookup: %A" creds
+      match creds with
+      | Some c ->
+        return! getResponseWithAuth0Credentials c req
+      | None ->
+        return resp
     | UnhandledResponse resp ->
       return resp
   }
+
+  let getAuthorizationResponse : _ -> Job<AuthenticationResult> =
+    getResponse
+    >> Job.bind Response.readBodyAsString
+    >> Job.map (Json.tryParse >> Choice.bind Json.tryDeserialize)
+    >> Job.catch
+    >> Job.map
+      ( function
+        | Choice1Of2 (Choice1Of2 authresult) -> authresult
+        | Choice1Of2 (Choice2Of2 parseError) -> AuthenticationFailed (DeserializationError parseError)
+        | Choice2Of2 (:? System.Net.WebException as exn) when exn.Status = System.Net.WebExceptionStatus.Timeout -> AuthenticationFailed OperationTimedOut
+        | Choice2Of2 exn -> AuthenticationFailed (Exception exn)
+      )
+
 
 type CredentialCacheEntry =
   { IdToken : JwtToken
@@ -358,11 +401,16 @@ module CredentialCacheEntry =
     else
       None
 
+  let toHttpAuthorizationToken (x : CredentialCacheEntry) : HttpAuthorizationToken =
+    { TokenType = x.TokenType
+      IdToken = x.IdToken
+    }
+
 type CredentialCache =
   CredentialCache of SharedMap<Auth0Client,CredentialCacheEntry>
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
-module CredentialsCache =
+module CredentialCache =
   let create () =
     SharedMap.create ()
     |> Job.map CredentialCache
