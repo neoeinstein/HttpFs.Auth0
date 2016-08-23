@@ -6,21 +6,21 @@ NUGET
       FParsec (>= 1.0 < 2.0)
     FParsec (1.0.2)
     FSharp.Core (4.0.0.1) - redirects: force
-    Hopac (0.3.4)
+    Hopac (0.3.12)
       FSharp.Core (>= 3.1.2.5)
     Hopac.Plus (0.1.1)
       FSharp.Core (>= 3.1.2.5)
-      Hopac (>= 0.3.4 < 0.4)
-    Http.fs (3.0.7)
+      Hopac (>= 0.3.12 < 0.4)
+    Http.fs (3.1.1)
       FSharp.Core (>= 3.1.2.5)
-      Hopac (>= 0.3.4)
+      Hopac (>= 0.3.12)
 GITHUB
   remote: neoeinstein/YoLo
     YoLo.fs (acffdc6dbda8671e039b83e149c976384b9c47c9)
 GROUP Build
 NUGET
   remote: https://www.nuget.org/api/v2
-    FAKE (4.37.2)
+    FAKE (4.38.3)
     FSharp.Compiler.Service (2.0.0.6)
     FSharp.Formatting (2.14.4)
       FSharp.Compiler.Service (2.0.0.6)
@@ -38,7 +38,7 @@ NUGET
     SourceLink.Fake (1.1)
 GITHUB
   remote: fsharp/FAKE
-    modules/Octokit/Octokit.fsx (934dc8313e2c54793813058fe2540511ad3b8468)
+    modules/Octokit/Octokit.fsx (487d6a0dcf0f4b5450c9ce4cefa0a02b478166d9)
       Octokit
 GROUP Test
 NUGET

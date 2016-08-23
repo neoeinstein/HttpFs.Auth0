@@ -4,7 +4,7 @@ nuget Chiron ~> 6
 nuget FSharp.Core >= 3.1.2.5 redirects: force
 nuget Hopac ~> 0.3.4
 nuget Hopac.Plus ~> 0.1.0
-nuget Http.fs ~> 3.0.7
+nuget Http.fs >= 3.1.1 <= 4
 
 github neoeinstein/YoLo YoLo.fs
 
