@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>Client - HttpFs.Auth0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content=""/>
+    <meta name="author" content="Marcus Griep <marcus@griep.us>"/>
+
+    <script src="https://code.jquery.com/jquery-1.8.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.8.23/jquery-ui.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/js/bootstrap.min.js"></script>
+    <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet"/>
+
+    <link type="text/css" rel="stylesheet" href="/HttpFs.Auth0/content/style.css" />
+    <script type="text/javascript" src="/HttpFs.Auth0/content/tips.js"></script>
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="container">
+      <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li><a href="http://fsharp.org">fsharp.org</a></li>
+          <li><a href="https://github.com/neoeinstein/HttpFs.Auth0">github page</a></li>
+        </ul>
+        <h3 class="muted"><a href="/HttpFs.Auth0/index.html">HttpFs.Auth0</a></h3>
+      </div>
+      <hr />
+      <div class="row">
+        <div class="span9" id="main">
+          
+
+
+
+<h1>Client</h1>
+<p>
+  <span>Namespace: HttpFs.Auth0</span><br />
+</p>
+<div class="xmldoc">
+<p>Interactions with requests.</p>
+
+</div>
+
+<!-- Render nested types and modules, if there are any -->
+
+  <h3>Functions and values</h3>
+  <table class="table table-bordered member-list">
+    <thead>
+      <tr><td>Function or value</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '7', 7)" onmouseover="showTip(event, '7', 7)">
+            addAuth0TokenHeader a0token req
+          </code>
+          <div class="tip" id="7">
+            <strong>Signature:</strong> a0token:Auth0Token -&gt; req:Request -&gt; Request<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fs#L371-371" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Adds an Auth0 token to the request in an <code>Authorization</code> header.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '8', 8)" onmouseover="showTip(event, '8', 8)">
+            addAuth0TokenHeaderFromSource ats cp req
+          </code>
+          <div class="tip" id="8">
+            <strong>Signature:</strong> ats:(Uri -&gt; ClientParams -&gt; &#39;?7635) -&gt; cp:ClientParams -&gt; req:Request -&gt; Alt&lt;Request&gt;<br />
+                          <strong>Type parameters:</strong> '?7635          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fs#L374-374" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Attempts to retrieve an Auth0 token from an asynchronous source, adding it
+to the request if available.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '9', 9)" onmouseover="showTip(event, '9', 9)">
+            tryGetResponseWithAuthSource ats cp req
+          </code>
+          <div class="tip" id="9">
+            <strong>Signature:</strong> ats:(Uri -&gt; ClientParams -&gt; &#39;?7637) -&gt; cp:ClientParams -&gt; req:Request -&gt; Alt&lt;Choice&lt;Response,exn&gt;&gt;<br />
+                          <strong>Type parameters:</strong> '?7637          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fs#L385-385" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Attempts retrieve an Auth0 token from an asynchronous source, adding it
+to the request if available and then processes the request.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '10', 10)" onmouseover="showTip(event, '10', 10)">
+            tryGetResponseWithRetryOnAuthRequired (...)
+          </code>
+          <div class="tip" id="10">
+            <strong>Signature:</strong> ats:(Uri -&gt; ClientParams -&gt; &#39;?7642) -&gt; req:Request -&gt; Alt&lt;Choice&lt;Response,exn&gt;&gt;<br />
+                          <strong>Type parameters:</strong> '?7642          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fs#L404-404" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Attempts to process a request, then if the response is <code>401 Unauthorized</code>,
+retries the request after retrieving an Auth0 token from an asynchronous source.
+The result of the retried response or any other initial response is returned.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '11', 11)" onmouseover="showTip(event, '11', 11)">
+            tryWithRetryOnAuthRequired (...)
+          </code>
+          <div class="tip" id="11">
+            <strong>Signature:</strong> ats:(Uri -&gt; ClientParams -&gt; &#39;?7639) -&gt; req:Request -&gt; respCJ:&#39;?7640 -&gt; Alt&lt;Choice&lt;Response,exn&gt;&gt;<br />
+                          <strong>Type parameters:</strong> '?7639, '?7640          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fs#L393-393" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Handles a response. If the response is <code>401 Unauthorized</code>, attempts to
+retrieve an Auth0 token and if available, retries the request with the
+token added to the request. The result of the retry is returned. In all
+other cases, the response is passed through unaltered.</p>
+
+
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+        </div>
+        <div class="span3">
+          <img src="/HttpFs.Auth0/img/logo.png" alt="F# Project" style="width:150px;margin:10px" />  
+          <ul class="nav nav-list" id="menu" style="margin-top: 20px;">
+            <li class="nav-header">HttpFs.Auth0</li>
+            <li><a href="/HttpFs.Auth0/index.html">Home page</a></li>
+            <li class="divider"></li>
+            <li><a href="http://nuget.org/packages/HttpFs.Auth0">Get Library via NuGet</a></li>
+            <li><a href="https://github.com/neoeinstein/HttpFs.Auth0">Source Code on GitHub</a></li>
+            <li><a href="/HttpFs.Auth0/license.html">License</a></li>
+            <li><a href="/HttpFs.Auth0/release-notes.html">Release Notes</a></li>
+            
+            <!--li class="nav-header">Getting started</li>
+            <li><a href="/HttpFs.Auth0/tutorial.html">Sample tutorial</a></li-->
+
+            <li class="nav-header">Documentation</li>
+            <li><a href="/HttpFs.Auth0/reference/index.html">API Reference</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <a href="https://github.com/neoeinstein/HttpFs.Auth0"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"/></a>
+  </body>
+  </html>

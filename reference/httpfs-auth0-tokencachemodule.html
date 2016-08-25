@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>TokenCache - HttpFs.Auth0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content=""/>
+    <meta name="author" content="Marcus Griep <marcus@griep.us>"/>
+
+    <script src="https://code.jquery.com/jquery-1.8.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.8.23/jquery-ui.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/js/bootstrap.min.js"></script>
+    <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet"/>
+
+    <link type="text/css" rel="stylesheet" href="/HttpFs.Auth0/content/style.css" />
+    <script type="text/javascript" src="/HttpFs.Auth0/content/tips.js"></script>
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="container">
+      <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li><a href="http://fsharp.org">fsharp.org</a></li>
+          <li><a href="https://github.com/neoeinstein/HttpFs.Auth0">github page</a></li>
+        </ul>
+        <h3 class="muted"><a href="/HttpFs.Auth0/index.html">HttpFs.Auth0</a></h3>
+      </div>
+      <hr />
+      <div class="row">
+        <div class="span9" id="main">
+          
+
+
+
+<h1>TokenCache</h1>
+<p>
+  <span>Namespace: HttpFs.Auth0</span><br />
+</p>
+<div class="xmldoc">
+<p>Operations for interacting with a <a href="httpfs-auth0-tokencache.html" title="TokenCache"><code>TokenCache</code></a>.</p>
+
+</div>
+
+<!-- Render nested types and modules, if there are any -->
+
+  <h3>Functions and values</h3>
+  <table class="table table-bordered member-list">
+    <thead>
+      <tr><td>Function or value</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '12', 12)" onmouseover="showTip(event, '12', 12)">
+            create ()
+          </code>
+          <div class="tip" id="12">
+            <strong>Signature:</strong> unit -&gt; Job&lt;TokenCache&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fs#L493-493" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Creates a new token cache.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '13', 13)" onmouseover="showTip(event, '13', 13)">
+            putAuthenticationResult cep tc cp ar
+          </code>
+          <div class="tip" id="13">
+            <strong>Signature:</strong> cep:CacheExpirationParameters -&gt; tc:TokenCache -&gt; cp:ClientParams -&gt; ar:AuthenticationResult -&gt; Alt&lt;unit&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fs#L500-500" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Processes an authentication result, caching the value for a particular client
+using the cache expiration parameters provided.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '14', 14)" onmouseover="showTip(event, '14', 14)">
+            putToken tc cp at exp
+          </code>
+          <div class="tip" id="14">
+            <strong>Signature:</strong> tc:TokenCache -&gt; cp:ClientParams -&gt; at:Auth0Token -&gt; exp:int64 -&gt; Alt&lt;unit&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fs#L497-497" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Adds a token to the cache with the specified expiration time (in UNIX time).</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '15', 15)" onmouseover="showTip(event, '15', 15)">
+            tryGetEntry tc cp
+          </code>
+          <div class="tip" id="15">
+            <strong>Signature:</strong> tc:TokenCache -&gt; cp:ClientParams -&gt; Alt&lt;Choice&lt;Auth0Token,Auth0ApiFailure&gt; option&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fs#L503-503" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Attempts to get an Auth0 authentication result from the cache. Does not check the expiration of the returned value.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '16', 16)" onmouseover="showTip(event, '16', 16)">
+            tryGetToken cep tc cp
+          </code>
+          <div class="tip" id="16">
+            <strong>Signature:</strong> cep:CacheExpirationParameters -&gt; tc:TokenCache -&gt; cp:ClientParams -&gt; Alt&lt;Auth0Token option&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fs#L515-515" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Attempts to get an unexpired Auth0 authentication token from the cache.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '17', 17)" onmouseover="showTip(event, '17', 17)">
+            tryGetTokenWithFill cep cp2arJ tc cp
+          </code>
+          <div class="tip" id="17">
+            <strong>Signature:</strong> cep:CacheExpirationParameters -&gt; cp2arJ:(ClientParams -&gt; &#39;?7655) -&gt; tc:TokenCache -&gt; cp:ClientParams -&gt; Alt&lt;Auth0Token option&gt;<br />
+                          <strong>Type parameters:</strong> '?7655          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fs#L522-522" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Attempts to get an unexpired Auth0 authentication token from the cache. If the
+token is expired or doesn't exist in the cache, gets an authentication result
+and adds it to the cache. The token provided by this authentication result is
+then returned. The token is added in such a way that if there are multiple
+concurrent requests for the same token, they will await the same response.</p>
+
+
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+        </div>
+        <div class="span3">
+          <img src="/HttpFs.Auth0/img/logo.png" alt="F# Project" style="width:150px;margin:10px" />  
+          <ul class="nav nav-list" id="menu" style="margin-top: 20px;">
+            <li class="nav-header">HttpFs.Auth0</li>
+            <li><a href="/HttpFs.Auth0/index.html">Home page</a></li>
+            <li class="divider"></li>
+            <li><a href="http://nuget.org/packages/HttpFs.Auth0">Get Library via NuGet</a></li>
+            <li><a href="https://github.com/neoeinstein/HttpFs.Auth0">Source Code on GitHub</a></li>
+            <li><a href="/HttpFs.Auth0/license.html">License</a></li>
+            <li><a href="/HttpFs.Auth0/release-notes.html">Release Notes</a></li>
+            
+            <!--li class="nav-header">Getting started</li>
+            <li><a href="/HttpFs.Auth0/tutorial.html">Sample tutorial</a></li-->
+
+            <li class="nav-header">Documentation</li>
+            <li><a href="/HttpFs.Auth0/reference/index.html">API Reference</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <a href="https://github.com/neoeinstein/HttpFs.Auth0"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"/></a>
+  </body>
+  </html>
