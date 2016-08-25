@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
-    <title>JwtTokenPayload - HttpFs.Auth0</title>
+    <title>Auth0Client - HttpFs.Auth0</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="description" content=""/>
     <meta name="author" content="Marcus Griep <marcus@griep.us>"/>
@@ -35,13 +35,12 @@
 
 
 
-<h1>JwtTokenPayload</h1>
+<h1>Auth0Client</h1>
 <p>
   <span>Namespace: HttpFs.Auth0</span><br />
-  <span>Parent Module: <a href="httpfs-auth0-types.html">Types</a></span>
 </p>
 <div class="xmldoc">
-<p>Operations for interacting with <a href="httpfs-auth0-types-jwttokenpayload.html" title="JwtTokenPayload"><code>JwtTokenPayload</code></a>.</p>
+<p>Interactions with requests.</p>
 
 </div>
 
@@ -56,91 +55,108 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '31', 31)" onmouseover="showTip(event, '31', 31)">
-            audience jwtPayload
+          <code onmouseout="hideTip(event, '1', 1)" onmouseover="showTip(event, '1', 1)">
+            addAuth0TokenHeader a0token req
           </code>
-          <div class="tip" id="31">
-            <strong>Signature:</strong> jwtPayload:JwtTokenPayload -&gt; string<br />
+          <div class="tip" id="1">
+            <strong>Signature:</strong> a0token:Auth0Token -&gt; req:Request -&gt; Request<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fs#L75-75" class="github-link">
+            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fs#L490-490" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
+          <p>Adds an Auth0 token to the request in an <code>Authorization</code> header.</p>
+
+
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '32', 32)" onmouseover="showTip(event, '32', 32)">
-            expirationTime jwtPayload
+          <code onmouseout="hideTip(event, '2', 2)" onmouseover="showTip(event, '2', 2)">
+            addAuth0TokenHeaderFromSource ats cp req
           </code>
-          <div class="tip" id="32">
-            <strong>Signature:</strong> jwtPayload:JwtTokenPayload -&gt; int64 option<br />
-                      </div>
+          <div class="tip" id="2">
+            <strong>Signature:</strong> ats:(Uri -&gt; ClientParams -&gt; &#39;?7635) -&gt; cp:ClientParams -&gt; req:Request -&gt; Alt&lt;Request&gt;<br />
+                          <strong>Type parameters:</strong> '?7635          </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fs#L76-76" class="github-link">
+            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fs#L522-522" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
+          <p>Attempts to retrieve an Auth0 token from an asynchronous source, adding it
+to the request if available.</p>
+
+
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '33', 33)" onmouseover="showTip(event, '33', 33)">
-            issuedAt jwtPayload
+          <code onmouseout="hideTip(event, '3', 3)" onmouseover="showTip(event, '3', 3)">
+            tryGetResponseWithAuthSource ats cp req
           </code>
-          <div class="tip" id="33">
-            <strong>Signature:</strong> jwtPayload:JwtTokenPayload -&gt; int64 option<br />
-                      </div>
+          <div class="tip" id="3">
+            <strong>Signature:</strong> ats:(Uri -&gt; ClientParams -&gt; &#39;?7637) -&gt; cp:ClientParams -&gt; req:Request -&gt; Alt&lt;Choice&lt;Response,exn&gt;&gt;<br />
+                          <strong>Type parameters:</strong> '?7637          </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fs#L77-77" class="github-link">
+            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fs#L537-537" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
+          <p>Attempts retrieve an Auth0 token from an asynchronous source, adding it
+to the request if available and then processes the request.</p>
+
+
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '34', 34)" onmouseover="showTip(event, '34', 34)">
-            issuer jwtPayload
+          <code onmouseout="hideTip(event, '4', 4)" onmouseover="showTip(event, '4', 4)">
+            tryGetResponseWithRetryOnAuthRequired (...)
           </code>
-          <div class="tip" id="34">
-            <strong>Signature:</strong> jwtPayload:JwtTokenPayload -&gt; string<br />
-                      </div>
+          <div class="tip" id="4">
+            <strong>Signature:</strong> ats:(Uri -&gt; ClientParams -&gt; &#39;?7642) -&gt; req:Request -&gt; Alt&lt;Choice&lt;Response,exn&gt;&gt;<br />
+                          <strong>Type parameters:</strong> '?7642          </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fs#L73-73" class="github-link">
+            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fs#L570-570" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
+          <p>Attempts to process a request, then if the response is <code>401 Unauthorized</code>,
+retries the request after retrieving an Auth0 token from an asynchronous source.
+The result of the retried response or any other initial response is returned.</p>
+
+
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '35', 35)" onmouseover="showTip(event, '35', 35)">
-            subject jwtPayload
+          <code onmouseout="hideTip(event, '5', 5)" onmouseover="showTip(event, '5', 5)">
+            tryWithRetryOnAuthRequired (...)
           </code>
-          <div class="tip" id="35">
-            <strong>Signature:</strong> jwtPayload:JwtTokenPayload -&gt; string<br />
-                      </div>
+          <div class="tip" id="5">
+            <strong>Signature:</strong> ats:(Uri -&gt; ClientParams -&gt; &#39;?7639) -&gt; req:Request -&gt; respCJ:&#39;?7640 -&gt; Alt&lt;Choice&lt;Response,exn&gt;&gt;<br />
+                          <strong>Type parameters:</strong> '?7639, '?7640          </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fs#L74-74" class="github-link">
+            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fs#L547-547" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
+          <p>Handles a response. If the response is <code>401 Unauthorized</code>, attempts to
+retrieve an Auth0 token and if available, retries the request with the
+token added to the request. The result of the retry is returned. In all
+other cases, the response is passed through unaltered.</p>
+
+
         </td>
       </tr>
     </tbody>
