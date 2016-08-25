@@ -386,6 +386,7 @@ Target "Default" DoNothing
 "CleanDocs" ==> "ReleaseDocs"
 "GenerateDocs" ==> "ReleaseDocs"
 
+"AssemblyInfo" ==> "Default"
 "Build" ==> "Default"
 "RunTests" ==> "Default"
 "NuGet" ==> "Default"
