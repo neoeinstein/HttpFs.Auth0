@@ -329,7 +329,7 @@ module WwwAuthenticate =
        Array.tryFind (fst >> String.equalsConstantTime ct)
     >> Option.map snd
 
-module Client =
+module Auth0Client =
   let (|HttpStatus|_|) status (resp : Response) =
     if resp.statusCode = status then
       Some ()

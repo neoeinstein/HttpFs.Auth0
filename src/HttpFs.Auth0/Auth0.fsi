@@ -235,7 +235,7 @@ module Authentication =
       -> Alt<AuthenticationResult>
 
 /// Interactions with requests.
-module Client =
+module Auth0Client =
   /// Adds an Auth0 token to the request in an `Authorization` header.
   val addAuth0TokenHeader: a0token:Auth0Token -> req:Request -> Request
 

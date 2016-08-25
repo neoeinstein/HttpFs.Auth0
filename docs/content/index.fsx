@@ -72,7 +72,7 @@ let at =
 
 let respJ =
   Request.createUrl Get "http://www.example.com/protectedResource"
-  |> Client.addAuth0TokenHeader at
+  |> Auth0Client.addAuth0TokenHeader at
   |> getResponse
 
 (**
@@ -113,7 +113,7 @@ let respCToStringJ = function
 
 let respStrA =
   Request.createUrl Get "http://www.example.com/protectedResource"
-  |> Client.tryGetResponseWithRetryOnAuthRequired tryGetAuthToken
+  |> Auth0Client.tryGetResponseWithRetryOnAuthRequired tryGetAuthToken
   |> Alt.afterJob respCToStringJ
 
 (**
