@@ -371,6 +371,7 @@ Target "Default" DoNothing
 
 "Clean" ?=> "Build"
 "AssemblyInfo" ?=> "Build"
+"AssemblyInfo" ==> "NuGet"
 "Build" ?=> "RunTests"
 
 "Build" ==> "CopyBinaries"
@@ -386,7 +387,6 @@ Target "Default" DoNothing
 "CleanDocs" ==> "ReleaseDocs"
 "GenerateDocs" ==> "ReleaseDocs"
 
-"AssemblyInfo" ==> "Default"
 "Build" ==> "Default"
 "RunTests" ==> "Default"
 "NuGet" ==> "Default"
