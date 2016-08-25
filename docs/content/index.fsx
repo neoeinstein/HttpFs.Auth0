@@ -2,7 +2,13 @@
 // This block of code is omitted in the generated HTML documentation. Use
 // it to define helpers that you do not want to show in the documentation.
 #I "../../bin/HttpFs.Auth0"
+#r "Hopac.Core.dll"
+#r "Hopac.dll"
+#r "HttpFs.dll"
+#r "HttpFs.Auth0.dll"
 open System
+
+Hopac.Hopac.run <| Hopac.Job.unit ()
 
 module Choice =
   let getOrFail xyC =
@@ -14,6 +20,13 @@ module Uri =
   let isAbsolute (uri : Uri) = uri.IsAbsoluteUri
   let toString (uri : Uri) = uri.ToString()
 
+(*** define: logging ***)
+open HttpFs.Logging
+
+Global.initialise
+  { Global.DefaultConfig with
+      getLogger = fun _ -> ConsoleWindowTarget(Verbose) :> Logger
+  }
 (**
 HttpFs.Auth0
 ============
@@ -48,10 +61,7 @@ their [SSO Heroku application](https://github.com/auth0-samples/auth0-sso-dashbo
 account to test with by going to [https://www.auth0.com](https://auth0.com/how-it-works).
 
 *)
-#r "Hopac.Core.dll"
-#r "Hopac.dll"
-#r "HttpFs.dll"
-#r "HttpFs.Auth0.dll"
+(*** define-output: main ***)
 open Hopac
 open HttpFs.Client
 open HttpFs.Auth0
@@ -63,18 +73,33 @@ let cp =
 let ac =
   UsernamePassword ("FabrikamAD","publicdemo","TestUser123")
 
-let at =
+let atJ =
   Authentication.createRequest cp ac
   |> Authentication.tryAuthenticate
   |> Alt.afterFun Authentication.AuthenticationResult.toChoice
-  |> run
-  |> Choice.getOrFail
+
+let at = run atJ |> Choice.getOrFail
 
 let respJ =
   Request.createUrl Get "http://www.example.com/protectedResource"
   |> Auth0Client.addAuth0TokenHeader at
   |> getResponse
+(**
 
+This library uses the logging façade provided by `Http.Fs` under then
+`HttpFs.Logging` namespace. You can enable logging by initializing the
+façade and hooking it to your logging framework of choice.
+
+Setting up logging:
+
+*)
+(*** include: logging ***)
+(**
+
+Example logs:
+
+*)
+(*** include-output: main ***)
 (**
 
 In the next example demonstrates how to set up a token cache and validate the
