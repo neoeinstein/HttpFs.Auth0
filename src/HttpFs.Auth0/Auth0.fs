@@ -371,9 +371,9 @@ module Client =
   let addAuth0TokenHeader t r =
     addAuth0TokenHeaderImpl t r
 
-  let addAuth0TokenHeaderFromSource (u2cp2acOJ: System.Uri -> ClientParams -> #Job<Auth0Token option>) cp req =
+  let addAuth0TokenHeaderFromSource (u2cp2atOJ: System.Uri -> ClientParams -> #Job<Auth0Token option>) cp req =
     Alt.prepare ^ job {
-      let! atO = asJob ^ u2cp2acOJ req.url cp
+      let! atO = asJob ^ u2cp2atOJ req.url cp
       match atO with
       | Some at ->
         let setHeader = Request.setHeader ^ Authorization ^ Auth0Token.toHttpAuthorizationHeaderString at
