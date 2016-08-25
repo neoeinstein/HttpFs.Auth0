@@ -357,7 +357,7 @@ Target "Release" (fun _ ->
     // release on github
     createClientWithToken (getBuildParamOrDefault "github-token" "")
     |> createDraft gitOwner gitName release.NugetVersion (release.SemVer.PreRelease <> None) release.Notes
-    // TODO: |> uploadFile "PATH_TO_FILE"
+    |> uploadFile ("bin" </> (project + "." + release.NugetVersion + ".nupkg"))
     |> releaseDraft
     |> Async.RunSynchronously
 )
