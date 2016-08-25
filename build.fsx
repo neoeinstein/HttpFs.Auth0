@@ -137,9 +137,9 @@ Target "CleanDocs" (fun _ ->
 Target "Build" (fun _ ->
     !! solutionFile
 #if MONO
-    |> MSBuildReleaseExt "" [ ("DefineConstants","MONO") ] "Rebuild"
+    |> MSBuildReleaseExt "" [ ("DefineConstants","MONO") ] "Build"
 #else
-    |> MSBuildRelease "" "Rebuild"
+    |> MSBuildRelease "" "Build"
 #endif
     |> ignore
 )
@@ -185,7 +185,7 @@ Target "NuGet" (fun _ ->
             ReleaseNotes = toLines release.Notes})
 )
 
-Target "PublishNuget" (fun _ ->
+Target "PublishNuGet" (fun _ ->
     Paket.Push(fun p ->
         { p with
             WorkingDir = "bin" })
@@ -329,7 +329,7 @@ Target "AddLangDocs" (fun _ ->
 Target "ReleaseDocs" (fun _ ->
     let tempDocsDir = "temp/gh-pages"
     CleanDir tempDocsDir
-    Repository.cloneSingleBranch "" (gitHome + "/" + gitName + ".git") "gh-pages" tempDocsDir
+    Repository.cloneSingleBranch "" ("git@github.com:" + gitOwner + "/" + gitName + ".git") "gh-pages" tempDocsDir
 
     CopyRecursive "docs/output" tempDocsDir true |> tracefn "%A"
     StageAll tempDocsDir
@@ -341,14 +341,6 @@ Target "ReleaseDocs" (fun _ ->
 open Octokit
 
 Target "Release" (fun _ ->
-    let user =
-        match getBuildParam "github-user" with
-        | s when not (String.IsNullOrWhiteSpace s) -> s
-        | _ -> getUserInput "Username: "
-    let pw =
-        match getBuildParam "github-pw" with
-        | s when not (String.IsNullOrWhiteSpace s) -> s
-        | _ -> getUserPassword "Password: "
     let remote =
         Git.CommandHelper.getGitResult "" "remote -v"
         |> Seq.filter (fun (s: string) -> s.EndsWith("(push)"))
@@ -363,7 +355,7 @@ Target "Release" (fun _ ->
     Branches.pushTag "" remote release.NugetVersion
 
     // release on github
-    createClient user pw
+    createClientWithToken (getBuildParamOrDefault "github-token" "")
     |> createDraft gitOwner gitName release.NugetVersion (release.SemVer.PreRelease <> None) release.Notes
     // TODO: |> uploadFile "PATH_TO_FILE"
     |> releaseDraft
@@ -375,42 +367,49 @@ Target "BuildPackage" DoNothing
 // --------------------------------------------------------------------------------------
 // Run all targets by default. Invoke 'build <Target>' to override
 
-Target "All" DoNothing
+Target "Default" DoNothing
 
-"Clean"
-  ==> "AssemblyInfo"
-  ==> "Build"
-  ==> "CopyBinaries"
-  ==> "RunTests"
-  ==> "GenerateReferenceDocs"
-  ==> "GenerateDocs"
-  ==> "All"
-  =?> ("ReleaseDocs",isLocalBuild)
+"Clean" ?=> "Build"
+"AssemblyInfo" ?=> "Build"
+"Build" ?=> "RunTests"
 
-"All"
+"Build" ==> "CopyBinaries"
+"CopyBinaries" ==> "GenerateReferenceDocs"
+
+"CleanDocs" ?=> "GenerateHelp"
+"CleanDocs" ?=> "GenerateReferenceDocs"
+"CopyBinaries" ?=> "GenerateHelp"
+"CopyBinaries" ?=> "GenerateHelp"
+"GenerateHelp" ==> "GenerateDocs"
+"GenerateReferenceDocs" ==> "GenerateDocs"
+
+"CleanDocs" ==> "ReleaseDocs"
+"GenerateDocs" ==> "ReleaseDocs"
+
+"Build" ==> "Default"
+"RunTests" ==> "Default"
+"NuGet" ==> "Default"
+
+"CopyBinaries" ==> "NuGet"
+
+"NuGet" ==> "BuildPackage"
+
 #if MONO
 #else
-  =?> ("SourceLink", Pdbstr.tryFind().IsSome )
+if Option.isSome <| Pdbstr.tryFind () then
+  "Build" ?=> "SourceLink" |> ignore
+  "SourceLink" ?=> "NuGet" |> ignore
+  "SourceLink" ==> "PublishNuGet" |> ignore
 #endif
-  ==> "NuGet"
-  ==> "BuildPackage"
 
-"CleanDocs"
-  ==> "GenerateHelp"
-  ==> "GenerateReferenceDocs"
-  ==> "GenerateDocs"
+"CleanDocs" ==> "GenerateHelpDebug"
+"GenerateHelpDebug" ==> "KeepRunning"
 
-"CleanDocs"
-  ==> "GenerateHelpDebug"
+"RunTests" ==> "PublishNuGet"
+"NuGet" ==> "PublishNuGet"
+"AssemblyInfo" ==> "PublishNuGet"
+"Clean" ==> "Release"
+"PublishNuget" ==> "Release"
+"ReleaseDocs" ==> "Release"
 
-"GenerateHelpDebug"
-  ==> "KeepRunning"
-
-"BuildPackage"
-  ==> "PublishNuget"
-  ==> "Release"
-
-"ReleaseDocs"
-  ==> "Release"
-
-RunTargetOrDefault "All"
+RunTargetOrDefault "Default"

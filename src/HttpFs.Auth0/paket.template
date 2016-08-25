@@ -3,7 +3,7 @@ title
     HttpFs.Auth0
 owners
     Marcus Griep <marcus@griep.us>
-authors 
+authors
     Marcus Griep <marcus@griep.us>
 projectUrl
     https://github.com/neoeinstein/HttpFs.Auth0
@@ -16,10 +16,8 @@ requireLicenseAcceptance
 copyright
     Copyright 2015
 tags
-    http auth0 authentication
+    http auth0 authentication httpfs http.fs hopac
 summary
     Support for authentication patterns using Auth0
 description
     Provides constructs which make it easier to use Auth0 when interacting with protected APIs.
-
-

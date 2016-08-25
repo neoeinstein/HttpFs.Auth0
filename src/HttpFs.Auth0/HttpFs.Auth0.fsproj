@@ -65,6 +65,7 @@
       <Link>paket-files/YoLo.fs</Link>
     </Compile>
     <Compile Include="AssemblyInfo.fs" Condition="Exists('AssemblyInfo.fs')" />
+    <Compile Include="Auth0.fsi" />
     <Compile Include="Auth0.fs" />
     <None Include="paket.references" />
     <None Include="paket.template" />

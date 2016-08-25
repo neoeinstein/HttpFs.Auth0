@@ -6,17 +6,17 @@ NUGET
       FParsec (>= 1.0 < 2.0)
     FParsec (1.0.2)
     FSharp.Core (4.0.0.1) - redirects: force
-    Hopac (0.3.12)
+    Hopac (0.3.13)
       FSharp.Core (>= 3.1.2.5)
     Hopac.Plus (0.1.1)
       FSharp.Core (>= 3.1.2.5)
       Hopac (>= 0.3.12 < 0.4)
-    Http.fs (3.1.1)
+    Http.fs (4.0.2)
       FSharp.Core (>= 3.1.2.5)
-      Hopac (>= 0.3.12)
+      Hopac (>= 0.3.13)
 GITHUB
   remote: neoeinstein/YoLo
-    YoLo.fs (acffdc6dbda8671e039b83e149c976384b9c47c9)
+    YoLo.fs (af94ad314389ef1ec0e2e16f80856d706b3210d7)
 GROUP Build
 NUGET
   remote: https://www.nuget.org/api/v2

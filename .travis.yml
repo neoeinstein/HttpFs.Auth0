@@ -1,9 +1,21 @@
 language: csharp
 
+mono:
+  - 4.2.3
+  - 4.4.1
+  - weekly
+  - latest
+
 sudo: false  # use the new container-based Travis infrastructure 
 
 before_install:
   - chmod +x build.sh
  
 script: 
-  - ./build.sh All
+  - ./build.sh BuildPackage
+
+matrix:
+  allow_failures:
+   - mono: 4.4.1
+   - mono: latest
+   - mono: weekly
