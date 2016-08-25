@@ -22,8 +22,8 @@ HttpFs.Auth0
 
 This library focuses on server-to-server interactions, where one service needs to authenticate itself to
 another service in order to gain access to a provided resource. This library also includes a
-[`TokenCache`](reference/httpfs-auth0-tokencache.html) for transiently caching ID tokens for use during
-their valid period.
+[`TokenCache`](reference/httpfs-auth0-tokencachemodule.html) for transiently caching ID tokens while they
+remain valid.
 
 **HttpFs.Auth0** also supports a knock-first workflow, where an attempt is made to interact with a resource first.
 In this case, if the resource sends back a `401 Unauthorized` response, then the request can be retried after
