@@ -21,7 +21,7 @@
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;LOGGING</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <StartAction>Project</StartAction>
     <StartProgram>
