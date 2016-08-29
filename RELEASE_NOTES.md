@@ -1,3 +1,6 @@
+### 0.1.0-beta004
+* Better disposal of consumed responses
+
 ### 0.1.0-beta003
 * Remove logging in release
 
