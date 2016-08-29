@@ -125,14 +125,7 @@ façade and hooking it to your logging framework of choice.</p>
 </tr>
 </table>
 <p>Example logs:</p>
-<table class="pre"><tr><td><pre><code>[D] 2016-08-25T19:24:29.6470919+00:00: Attempting to authenticate with https://fabrikam.auth0.com/oauth/ro [HttpFs.Auth0.Authentication]
-[D] 2016-08-25T19:24:32.7964068+00:00: 4114774 µs [HttpFs.Auth0.Authentication.responseTime.fabrikam_auth0_com]
-[D] 2016-08-25T19:24:32.7964068+00:00: 4114774 µs [HttpFs.Auth0.Authentication.responseTime.fabrikam_auth0_com./oauth/ro]
-[D] 2016-08-25T19:24:32.8134085+00:00: Received response from authentication API https://fabrikam.auth0.com/oauth/ro with status code 200 [HttpFs.Auth0.Authentication]
-[V] 2016-08-25T19:24:32.8174089+00:00: Reading authentication response [HttpFs.Auth0.Authentication]
-[V] 2016-08-25T19:24:32.8304102+00:00: Read authentication response [HttpFs.Auth0.Authentication]
- - length: 380
-[D] 2016-08-25T19:24:32.9524224+00:00: Successfully decoded authentication response [HttpFs.Auth0.Authentication]</code></pre></td></tr></table>
+<table class="pre"><tr><td><pre><code></code></pre></td></tr></table>
 <p>In the next example demonstrates how to set up a token cache and validate the
 client parameters returned by the protected resource against a whitelist of
 known client parameters. This helps to ensure that a malicious resource can't
