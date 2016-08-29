@@ -616,14 +616,14 @@ module Auth0Client =
         |> Logging.timeJob ^ logResponseTime req.url
 
       match respC with
-      | Choice1Of2 (HttpStatus 401 & HasAuth0WwwAuthenticate cp) ->
+      | Choice1Of2 (HttpStatus 401 & HasAuth0WwwAuthenticate cp as resp) ->
 #if LOGGING
         event Info "Received a 401 from {resourceUri} and found Auth0 client parameters; will attempt to retry with token"
         |> setField "clientParams" cp
         |> setField "resourceUri" req.url
         |> logger.logSimple
 #endif
-
+        (resp :> System.IDisposable).Dispose()
         let! retryC = tryGetResponseWithAuthSource u2cp2atOJ cp req
         return Alt.always retryC
       | _ ->
