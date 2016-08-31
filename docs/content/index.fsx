@@ -86,23 +86,7 @@ let respJ =
   |> getResponse
 (**
 
-This library uses the logging façade provided by `Http.Fs` under then
-`HttpFs.Logging` namespace. You can enable logging by initializing the
-façade and hooking it to your logging framework of choice.
-
-Setting up logging:
-
-*)
-(*** include: logging ***)
-(**
-
-Example logs:
-
-*)
-(*** include-output: main ***)
-(**
-
-In the next example demonstrates how to set up a token cache and validate the
+The next example demonstrates how to set up a token cache and validate the
 client parameters returned by the protected resource against a whitelist of
 known client parameters. This helps to ensure that a malicious resource can't
 trick you into sending your credentials to a malicious authentication server.
@@ -142,6 +126,51 @@ let respStrA =
   |> Alt.afterJob respCToStringJ
 
 (**
+
+Logging
+-------
+
+This library uses the logging façade provided by `Http.Fs` under then
+`HttpFs.Logging` namespace. You can enable logging by initializing the
+façade and hooking it to your logging framework of choice.
+
+Setting up logging:
+
+*)
+(*** include: logging ***)
+(**
+
+Example logs:
+
+*)
+(*** include-output: main ***)
+(**
+
+Note that you may see the following warning from Hopac. We are working to make
+this warning go away in a future version, but you should experience no adverse
+effects as the `run` utilized by Logary returns very quickly.
+
+    WARNING: You are making a blocking call from within a Hopac worker thread, which means that your program may deadlock.
+    First occurrence (there may be others):
+      at System.Environment.GetStackTrace(Exception e, Boolean needFileInfo)
+      at System.Environment.get_StackTrace()
+      at Hopac.Core.Condition.Wait(Object o, Int32& v)
+      at Hopac.Scheduler.run[x](Scheduler sr, Job`1 xJ)
+      at Logary.Adapters.Facade.LogaryFacadeAdapter.values@188.Invoke(Object x)
+      at <StartupCode$FSharp-Core>.$Reflect.Invoke@961-4.Invoke(T1 inp)
+      at HttpFs.Logging.Global.f@1-1(Flyweight this, Unit _arg1)
+      at HttpFs.Logging.Global.Flyweight.withLogger[a](FSharpFunc`2 action)
+      at HttpFs.Auth0.Auth0Client.u2xJ@1-3[a](FSharpFunc`2 u2cp2atOJ, Uri uri, ClientParams cp, Unit unitVar)
+      at HttpFs.Auth0.Auth0Client.tryGetAuth0TokenWithLogging@526-39.Do()
+      at Hopac.Core.JobDelay`1.DoJob(Worker& wr, Cont`1 xK)
+      at Hopac.Core.Always`1.DoJob(Worker& wr, Cont`1 xK)
+      at Hopac.Promise`1.Fulfill.Do(Worker& wr, T t)
+      at Hopac.Promise`1.Fulfill.DoWork(Worker& wr)
+      at Hopac.Core.Worker.Run(Scheduler sr, Int32 me)
+      at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean preserveSyncCtx)
+      at System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean preserveSyncCtx)
+      at System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state)
+      at System.Threading.ThreadHelper.ThreadStart()
 
 Samples & documentation
 -----------------------
