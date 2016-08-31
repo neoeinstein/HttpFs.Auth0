@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
-    <title>AuthenticationResult - HttpFs.Auth0</title>
+    <title>TokenCacheEntry - HttpFs.Auth0</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="description" content=""/>
     <meta name="author" content="Marcus Griep <marcus@griep.us>"/>
@@ -35,40 +35,58 @@
 
 
 
-<h1>AuthenticationResult</h1>
+<h1>TokenCacheEntry</h1>
 <p>
   <span>Namespace: HttpFs.Auth0</span><br />
-  <span>Parent Module: <a href="httpfs-auth0-authentication.html">Authentication</a></span>
 </p>
 <div class="xmldoc">
-<p>Operations for interacting with <a href="httpfs-auth0-authentication-authenticationresult.html" title="AuthenticationResult"><code>AuthenticationResult</code></a>.</p>
+<p>Represents an entry in the <a href="httpfs-auth0-tokencache.html" title="TokenCache"><code>TokenCache</code></a></p>
 
 </div>
-
-<!-- Render nested types and modules, if there are any -->
-
-  <h3>Functions and values</h3>
+  <h3>Record Fields</h3>
   <table class="table table-bordered member-list">
     <thead>
-      <tr><td>Function or value</td><td>Description</td></tr>
+      <tr><td>Record Field</td><td>Description</td></tr>
     </thead>
     <tbody>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '9', 9)" onmouseover="showTip(event, '9', 9)">
-            toChoice ar
+          <code onmouseout="hideTip(event, '63', 63)" onmouseover="showTip(event, '63', 63)">
+            Expiration
           </code>
-          <div class="tip" id="9">
-            <strong>Signature:</strong> ar:AuthenticationResult -&gt; Choice&lt;Auth0Token,Auth0ApiFailure&gt;<br />
+          <div class="tip" id="63">
+            <strong>Signature:</strong> int64<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fs#L255-255" class="github-link">
+            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fsi#L307-307" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
+          <p>The time at which the cached value will expire</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '64', 64)" onmouseover="showTip(event, '64', 64)">
+            Value
+          </code>
+          <div class="tip" id="64">
+            <strong>Signature:</strong> TokenCacheValue<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/neoeinstein/HttpFs.Auth0/tree/master/src/HttpFs.Auth0/Auth0.fsi#L305-305" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>The value that was cached</p>
+
+
         </td>
       </tr>
     </tbody>

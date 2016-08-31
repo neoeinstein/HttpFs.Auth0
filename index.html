@@ -104,29 +104,7 @@ account to test with by going to <a href="https://auth0.com/how-it-works"><a hre
 </code></pre></td>
 </tr>
 </table>
-<p>This library uses the logging façade provided by <code>Http.Fs</code> under then
-<code>HttpFs.Logging</code> namespace. You can enable logging by initializing the
-façade and hooking it to your logging framework of choice.</p>
-<p>Setting up logging:</p>
-<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
-<span class="l">2: </span>
-<span class="l">3: </span>
-<span class="l">4: </span>
-<span class="l">5: </span>
-<span class="l">6: </span>
-</pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">open</span> <span onmouseout="hideTip(event, 'fs21', 29)" onmouseover="showTip(event, 'fs21', 29)" class="i">HttpFs</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs22', 30)" onmouseover="showTip(event, 'fs22', 30)" class="i">Logging</span>
-
-<span onmouseout="hideTip(event, 'fs23', 31)" onmouseover="showTip(event, 'fs23', 31)" class="t">Global</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs24', 32)" onmouseover="showTip(event, 'fs24', 32)" class="f">initialise</span>
-  { <span onmouseout="hideTip(event, 'fs23', 33)" onmouseover="showTip(event, 'fs23', 33)" class="t">Global</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs25', 34)" onmouseover="showTip(event, 'fs25', 34)" class="i">DefaultConfig</span> <span class="k">with</span>
-      <span class="i">getLogger</span> <span class="o">=</span> <span class="k">fun</span> _ <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs26', 35)" onmouseover="showTip(event, 'fs26', 35)" class="t">ConsoleWindowTarget</span>(<span onmouseout="hideTip(event, 'fs27', 36)" onmouseover="showTip(event, 'fs27', 36)" class="p">Verbose</span>) <span class="o">:&gt;</span> <span onmouseout="hideTip(event, 'fs28', 37)" onmouseover="showTip(event, 'fs28', 37)" class="t">Logger</span>
-  }
-</code></pre></td>
-</tr>
-</table>
-<p>Example logs:</p>
-<table class="pre"><tr><td><pre><code></code></pre></td></tr></table>
-<p>In the next example demonstrates how to set up a token cache and validate the
+<p>The next example demonstrates how to set up a token cache and validate the
 client parameters returned by the protected resource against a whitelist of
 known client parameters. This helps to ensure that a malicious resource can't
 trick you into sending your credentials to a malicious authentication server.</p>
@@ -189,6 +167,85 @@ the token in memory while the token remains valid.</p>
   <span onmouseout="hideTip(event, 'fs48', 151)" onmouseover="showTip(event, 'fs48', 151)" class="t">Request</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs49', 152)" onmouseover="showTip(event, 'fs49', 152)" class="f">createUrl</span> <span onmouseout="hideTip(event, 'fs50', 153)" onmouseover="showTip(event, 'fs50', 153)" class="p">Get</span> <span class="s">&quot;http://www.example.com/protectedResource&quot;</span>
   <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs51', 154)" onmouseover="showTip(event, 'fs51', 154)" class="t">Auth0Client</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs91', 155)" onmouseover="showTip(event, 'fs91', 155)" class="f">tryGetResponseWithRetryOnAuthRequired</span> <span onmouseout="hideTip(event, 'fs82', 156)" onmouseover="showTip(event, 'fs82', 156)" class="f">tryGetAuthToken</span>
   <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs40', 157)" onmouseover="showTip(event, 'fs40', 157)" class="t">Alt</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs92', 158)" onmouseover="showTip(event, 'fs92', 158)" class="f">afterJob</span> <span onmouseout="hideTip(event, 'fs84', 159)" onmouseover="showTip(event, 'fs84', 159)" class="f">respCToStringJ</span>
+</code></pre></td>
+</tr>
+</table>
+<h2><a name="Logging" class="anchor" href="#Logging">Logging</a></h2>
+<p>This library uses the logging façade provided by <code>Http.Fs</code> under then
+<code>HttpFs.Logging</code> namespace. You can enable logging by initializing the
+façade and hooking it to your logging framework of choice.</p>
+<p>Setting up logging:</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">open</span> <span onmouseout="hideTip(event, 'fs21', 29)" onmouseover="showTip(event, 'fs21', 29)" class="i">HttpFs</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs22', 30)" onmouseover="showTip(event, 'fs22', 30)" class="i">Logging</span>
+
+<span onmouseout="hideTip(event, 'fs23', 31)" onmouseover="showTip(event, 'fs23', 31)" class="t">Global</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs24', 32)" onmouseover="showTip(event, 'fs24', 32)" class="f">initialise</span>
+  { <span onmouseout="hideTip(event, 'fs23', 33)" onmouseover="showTip(event, 'fs23', 33)" class="t">Global</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs25', 34)" onmouseover="showTip(event, 'fs25', 34)" class="i">DefaultConfig</span> <span class="k">with</span>
+      <span class="i">getLogger</span> <span class="o">=</span> <span class="k">fun</span> _ <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs26', 35)" onmouseover="showTip(event, 'fs26', 35)" class="t">ConsoleWindowTarget</span>(<span onmouseout="hideTip(event, 'fs27', 36)" onmouseover="showTip(event, 'fs27', 36)" class="p">Verbose</span>) <span class="o">:&gt;</span> <span onmouseout="hideTip(event, 'fs28', 37)" onmouseover="showTip(event, 'fs28', 37)" class="t">Logger</span>
+  }
+</code></pre></td>
+</tr>
+</table>
+<p>Example logs:</p>
+<table class="pre"><tr><td><pre><code>[D] 2016-08-31T16:26:22.9841451+00:00: 152707349 µs [HttpFs.Auth0.Authentication.tryAuthenticate.responseTime]
+[D] 2016-08-31T16:26:22.9841451+00:00: 152707349 µs [HttpFs.Auth0.Authentication.tryAuthenticate.responseTime.fabrikam_auth0_com]
+[D] 2016-08-31T16:26:22.9841451+00:00: 152707349 µs [HttpFs.Auth0.Authentication.tryAuthenticate.responseTime.fabrikam_auth0_com./oauth/ro]
+[D] 2016-08-31T16:26:23.0011451+00:00: Received response from authentication API https://fabrikam.auth0.com/oauth/ro with status code 200 [HttpFs.Auth0.Authentication]
+[V] 2016-08-31T16:26:23.0101451+00:00: Reading authentication response [HttpFs.Auth0.Authentication]
+[V] 2016-08-31T16:26:23.0191451+00:00: Read authentication response [HttpFs.Auth0.Authentication]
+ - length: 380
+[V] 2016-08-31T16:26:23.1051451+00:00: Successfully decoded authentication response [HttpFs.Auth0.Authentication]</code></pre></td></tr></table>
+<p>Note that you may see the following warning from Hopac. We are working to make
+this warning go away in a future version, but you should experience no adverse
+effects as the <code>run</code> utilized by Logary returns very quickly.</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+<span class="l">17: </span>
+<span class="l">18: </span>
+<span class="l">19: </span>
+<span class="l">20: </span>
+<span class="l">21: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">WARNING</span><span class="o">:</span> <span class="i">You</span> <span class="i">are</span> <span class="i">making</span> <span class="i">a</span> <span class="i">blocking</span> <span class="i">call</span> <span class="i">from</span> <span class="i">within</span> <span class="i">a</span> <span class="i">Hopac</span> <span class="i">worker</span> <span class="i">thread</span>, <span class="i">which</span> <span class="i">means</span> <span class="i">that</span> <span class="i">your</span> <span class="i">program</span> <span class="i">may</span> <span class="i">deadlock</span><span class="o">.</span>
+<span class="i">First</span> <span class="i">occurrence</span> (<span class="i">there</span> <span class="i">may</span> <span class="i">be</span> <span class="i">others</span>)<span class="o">:</span>
+  <span class="i">at</span> <span onmouseout="hideTip(event, 'fs1', 160)" onmouseover="showTip(event, 'fs1', 160)" class="i">System</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs93', 161)" onmouseover="showTip(event, 'fs93', 161)" class="i">Environment</span><span class="o">.</span><span class="i">GetStackTrace</span>(<span class="i">Exception</span> <span class="i">e</span>, <span class="i">Boolean</span> <span class="i">needFileInfo</span>)
+  <span class="i">at</span> <span onmouseout="hideTip(event, 'fs1', 162)" onmouseover="showTip(event, 'fs1', 162)" class="i">System</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs93', 163)" onmouseover="showTip(event, 'fs93', 163)" class="i">Environment</span><span class="o">.</span><span class="i">get_StackTrace</span>()
+  <span class="i">at</span> <span class="i">Hopac</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs94', 164)" onmouseover="showTip(event, 'fs94', 164)" class="i">Core</span><span class="o">.</span><span class="i">Condition</span><span class="o">.</span><span class="i">Wait</span>(<span class="i">Object</span> <span class="i">o</span>, <span class="i">Int32</span><span class="o">&amp;</span> <span class="i">v</span>)
+  <span class="i">at</span> <span class="i">Hopac</span><span class="o">.</span><span class="i">Scheduler</span><span class="o">.</span><span class="i">run</span>[<span class="i">x</span>](<span class="i">Scheduler</span> <span class="i">sr</span>, <span class="i">Job</span><span class="k">`</span><span class="n">1</span> <span class="i">xJ</span>)
+  <span class="i">at</span> <span class="i">Logary</span><span class="o">.</span><span class="i">Adapters</span><span class="o">.</span><span class="i">Facade</span><span class="o">.</span><span class="i">LogaryFacadeAdapter</span><span class="o">.</span><span class="i">values</span><span class="o">@</span><span class="n">188.Invoke</span>(<span class="i">Object</span> <span class="i">x</span>)
+  <span class="i">at</span> <span class="o">&lt;</span><span class="i">StartupCode</span><span class="o">$</span><span onmouseout="hideTip(event, 'fs95', 165)" onmouseover="showTip(event, 'fs95', 165)" class="i">FSharp</span><span class="o">-</span><span onmouseout="hideTip(event, 'fs94', 166)" onmouseover="showTip(event, 'fs94', 166)" class="i">Core</span><span class="o">&gt;</span><span class="i">Reflect</span><span class="o">.</span><span class="i">Invoke</span><span class="o">@</span><span class="n">961</span><span class="o">-</span><span class="n">4.Invoke</span>(<span class="i">T1</span> <span class="i">inp</span>)
+  <span class="i">at</span> <span class="i">HttpFs</span><span class="o">.</span><span class="i">Logging</span><span class="o">.</span><span class="i">Global</span><span class="o">.</span><span class="i">f</span><span class="o">@</span><span class="n">1</span><span class="o">-</span><span class="n">1</span>(<span class="i">Flyweight</span> <span class="i">this</span>, <span class="i">Unit</span> <span class="i">_arg1</span>)
+  <span class="i">at</span> <span class="i">HttpFs</span><span class="o">.</span><span class="i">Logging</span><span class="o">.</span><span class="i">Global</span><span class="o">.</span><span class="i">Flyweight</span><span class="o">.</span><span class="i">withLogger</span>[<span class="i">a</span>](<span onmouseout="hideTip(event, 'fs96', 167)" onmouseover="showTip(event, 'fs96', 167)" class="i">FSharpFunc</span><span class="k">`</span><span class="n">2</span> <span class="i">action</span>)
+  <span class="i">at</span> <span class="i">HttpFs</span><span class="o">.</span><span class="i">Auth0</span><span class="o">.</span><span class="i">Auth0Client</span><span class="o">.</span><span class="i">u2xJ</span><span class="o">@</span><span class="n">1</span><span class="o">-</span><span class="n">3</span>[<span class="i">a</span>](<span onmouseout="hideTip(event, 'fs96', 168)" onmouseover="showTip(event, 'fs96', 168)" class="i">FSharpFunc</span><span class="k">`</span><span class="n">2</span> <span class="i">u2cp2atOJ</span>, <span class="i">Uri</span> <span class="i">uri</span>, <span class="i">ClientParams</span> <span class="i">cp</span>, <span class="i">Unit</span> <span class="i">unitVar</span>)
+  <span class="i">at</span> <span class="i">HttpFs</span><span class="o">.</span><span class="i">Auth0</span><span class="o">.</span><span class="i">Auth0Client</span><span class="o">.</span><span class="i">tryGetAuth0TokenWithLogging</span><span class="o">@</span><span class="n">526</span><span class="o">-</span><span class="n">39.Do</span>()
+  <span class="i">at</span> <span class="i">Hopac</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs94', 169)" onmouseover="showTip(event, 'fs94', 169)" class="i">Core</span><span class="o">.</span><span class="i">JobDelay</span><span class="k">`</span><span class="n">1.DoJob</span>(<span class="i">Worker</span><span class="o">&amp;</span> <span class="i">wr</span>, <span class="i">Cont</span><span class="k">`</span><span class="n">1</span> <span class="i">xK</span>)
+  <span class="i">at</span> <span class="i">Hopac</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs94', 170)" onmouseover="showTip(event, 'fs94', 170)" class="i">Core</span><span class="o">.</span><span class="i">Always</span><span class="k">`</span><span class="n">1.DoJob</span>(<span class="i">Worker</span><span class="o">&amp;</span> <span class="i">wr</span>, <span class="i">Cont</span><span class="k">`</span><span class="n">1</span> <span class="i">xK</span>)
+  <span class="i">at</span> <span class="i">Hopac</span><span class="o">.</span><span class="i">Promise</span><span class="k">`</span><span class="n">1.Fulfill</span><span class="o">.</span><span class="i">Do</span>(<span class="i">Worker</span><span class="o">&amp;</span> <span class="i">wr</span>, <span class="i">T</span> <span class="i">t</span>)
+  <span class="i">at</span> <span class="i">Hopac</span><span class="o">.</span><span class="i">Promise</span><span class="k">`</span><span class="n">1.Fulfill</span><span class="o">.</span><span class="i">DoWork</span>(<span class="i">Worker</span><span class="o">&amp;</span> <span class="i">wr</span>)
+  <span class="i">at</span> <span class="i">Hopac</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs94', 171)" onmouseover="showTip(event, 'fs94', 171)" class="i">Core</span><span class="o">.</span><span class="i">Worker</span><span class="o">.</span><span class="i">Run</span>(<span class="i">Scheduler</span> <span class="i">sr</span>, <span class="i">Int32</span> <span class="i">me</span>)
+  <span class="i">at</span> <span onmouseout="hideTip(event, 'fs1', 172)" onmouseover="showTip(event, 'fs1', 172)" class="i">System</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs97', 173)" onmouseover="showTip(event, 'fs97', 173)" class="i">Threading</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs98', 174)" onmouseover="showTip(event, 'fs98', 174)" class="i">ExecutionContext</span><span class="o">.</span><span class="i">RunInternal</span>(<span class="i">ExecutionContext</span> <span class="i">executionContext</span>, <span class="i">ContextCallback</span> <span class="i">callback</span>, <span class="i">Object</span> <span class="i">state</span>, <span class="i">Boolean</span> <span class="i">preserveSyncCtx</span>)
+  <span class="i">at</span> <span onmouseout="hideTip(event, 'fs1', 175)" onmouseover="showTip(event, 'fs1', 175)" class="i">System</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs97', 176)" onmouseover="showTip(event, 'fs97', 176)" class="i">Threading</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs98', 177)" onmouseover="showTip(event, 'fs98', 177)" class="i">ExecutionContext</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs99', 178)" onmouseover="showTip(event, 'fs99', 178)" class="i">Run</span>(<span class="i">ExecutionContext</span> <span class="i">executionContext</span>, <span class="i">ContextCallback</span> <span class="i">callback</span>, <span class="i">Object</span> <span class="i">state</span>, <span class="i">Boolean</span> <span class="i">preserveSyncCtx</span>)
+  <span class="i">at</span> <span onmouseout="hideTip(event, 'fs1', 179)" onmouseover="showTip(event, 'fs1', 179)" class="i">System</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs97', 180)" onmouseover="showTip(event, 'fs97', 180)" class="i">Threading</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs98', 181)" onmouseover="showTip(event, 'fs98', 181)" class="i">ExecutionContext</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs99', 182)" onmouseover="showTip(event, 'fs99', 182)" class="i">Run</span>(<span class="i">ExecutionContext</span> <span class="i">executionContext</span>, <span class="i">ContextCallback</span> <span class="i">callback</span>, <span class="i">Object</span> <span class="i">state</span>)
+  <span class="i">at</span> <span onmouseout="hideTip(event, 'fs1', 183)" onmouseover="showTip(event, 'fs1', 183)" class="i">System</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs97', 184)" onmouseover="showTip(event, 'fs97', 184)" class="i">Threading</span><span class="o">.</span><span class="i">ThreadHelper</span><span class="o">.</span><span class="i">ThreadStart</span>()
 </code></pre></td>
 </tr>
 </table>
@@ -291,8 +348,8 @@ redistribution for both commercial and non-commercial purposes. For more informa
 <div class="tip" id="fs79">val result : &#39;x -&gt; Job&lt;&#39;x&gt;<br /><br />Full name: Hopac.Job.result</div>
 <div class="tip" id="fs80">val tryAuthenticateClient : uri:Uri -&gt; cp:ClientParams -&gt; Alt&lt;Authentication.AuthenticationResult&gt;<br /><br />Full name: Index.tryAuthenticateClient</div>
 <div class="tip" id="fs81">val tryAuthenticateFromSource : ats:(Uri -&gt; ClientParams -&gt; #Job&lt;Auth0Credentials option&gt;) -&gt; uri:Uri -&gt; cp:ClientParams -&gt; Alt&lt;Authentication.AuthenticationResult&gt;<br /><br />Full name: HttpFs.Auth0.Authentication.tryAuthenticateFromSource</div>
-<div class="tip" id="fs82">val tryGetAuthToken : uri:Uri -&gt; (ClientParams -&gt; Alt&lt;Auth0Token option&gt;)<br /><br />Full name: Index.tryGetAuthToken</div>
-<div class="tip" id="fs83">val tryGetTokenWithFill : cep:CacheExpirationParameters -&gt; cp2arJ:(ClientParams -&gt; #Job&lt;Authentication.AuthenticationResult&gt;) -&gt; tc:TokenCache -&gt; cp:ClientParams -&gt; Alt&lt;Auth0Token option&gt;<br /><br />Full name: HttpFs.Auth0.TokenCache.tryGetTokenWithFill</div>
+<div class="tip" id="fs82">val tryGetAuthToken : uri:Uri -&gt; (ClientParams -&gt; Job&lt;Auth0Token option&gt;)<br /><br />Full name: Index.tryGetAuthToken</div>
+<div class="tip" id="fs83">val tryGetTokenWithFill : cep:CacheExpirationParameters -&gt; cp2arJ:(ClientParams -&gt; #Job&lt;Authentication.AuthenticationResult&gt;) -&gt; tc:TokenCache -&gt; cp:ClientParams -&gt; Job&lt;Auth0Token option&gt;<br /><br />Full name: HttpFs.Auth0.TokenCache.tryGetTokenWithFill</div>
 <div class="tip" id="fs84">val respCToStringJ : _arg1:Choice&lt;Response,exn&gt; -&gt; Job&lt;string&gt;<br /><br />Full name: Index.respCToStringJ</div>
 <div class="tip" id="fs85">val resp : Response</div>
 <div class="tip" id="fs86">Multiple items<br />module Response<br /><br />from HttpFs.Client<br /><br />--------------------<br />type Response =<br />&#160;&#160;{statusCode: int;<br />&#160;&#160;&#160;contentLength: int64;<br />&#160;&#160;&#160;characterSet: CharacterSet;<br />&#160;&#160;&#160;cookies: Map&lt;string,string&gt;;<br />&#160;&#160;&#160;headers: Map&lt;ResponseHeader,string&gt;;<br />&#160;&#160;&#160;expectedEncoding: Encoding option;<br />&#160;&#160;&#160;responseUri: Uri;<br />&#160;&#160;&#160;body: Stream;<br />&#160;&#160;&#160;luggage: IDisposable option;}<br />&#160;&#160;interface IDisposable<br />&#160;&#160;override ToString : unit -&gt; string<br />&#160;&#160;static member private ofHttpResponse : response:HttpWebResponse -&gt; Response<br /><br />Full name: HttpFs.Client.Response</div>
@@ -302,6 +359,13 @@ redistribution for both commercial and non-commercial purposes. For more informa
 <div class="tip" id="fs90">val respStrA : Alt&lt;string&gt;<br /><br />Full name: Index.respStrA</div>
 <div class="tip" id="fs91">val tryGetResponseWithRetryOnAuthRequired : ats:(Uri -&gt; ClientParams -&gt; #Job&lt;Auth0Token option&gt;) -&gt; req:Request -&gt; Alt&lt;Choice&lt;Response,exn&gt;&gt;<br /><br />Full name: HttpFs.Auth0.Auth0Client.tryGetResponseWithRetryOnAuthRequired</div>
 <div class="tip" id="fs92">val afterJob : (&#39;x -&gt; #Job&lt;&#39;y&gt;) -&gt; Alt&lt;&#39;x&gt; -&gt; Alt&lt;&#39;y&gt;<br /><br />Full name: Hopac.Alt.afterJob</div>
+<div class="tip" id="fs93">type Environment =<br />&#160;&#160;static member CommandLine : string<br />&#160;&#160;static member CurrentDirectory : string with get, set<br />&#160;&#160;static member Exit : exitCode:int -&gt; unit<br />&#160;&#160;static member ExitCode : int with get, set<br />&#160;&#160;static member ExpandEnvironmentVariables : name:string -&gt; string<br />&#160;&#160;static member FailFast : message:string -&gt; unit + 1 overload<br />&#160;&#160;static member GetCommandLineArgs : unit -&gt; string[]<br />&#160;&#160;static member GetEnvironmentVariable : variable:string -&gt; string + 1 overload<br />&#160;&#160;static member GetEnvironmentVariables : unit -&gt; IDictionary + 1 overload<br />&#160;&#160;static member GetFolderPath : folder:SpecialFolder -&gt; string + 1 overload<br />&#160;&#160;...<br />&#160;&#160;nested type SpecialFolder<br />&#160;&#160;nested type SpecialFolderOption<br /><br />Full name: System.Environment</div>
+<div class="tip" id="fs94">namespace Microsoft.FSharp.Core</div>
+<div class="tip" id="fs95">namespace Microsoft.FSharp</div>
+<div class="tip" id="fs96">new : unit -&gt; FSharpFunc&lt;&#39;T,&#39;U&gt;</div>
+<div class="tip" id="fs97">namespace System.Threading</div>
+<div class="tip" id="fs98">type ExecutionContext =<br />&#160;&#160;member CreateCopy : unit -&gt; ExecutionContext<br />&#160;&#160;member Dispose : unit -&gt; unit<br />&#160;&#160;member GetObjectData : info:SerializationInfo * context:StreamingContext -&gt; unit<br />&#160;&#160;static member Capture : unit -&gt; ExecutionContext<br />&#160;&#160;static member IsFlowSuppressed : unit -&gt; bool<br />&#160;&#160;static member RestoreFlow : unit -&gt; unit<br />&#160;&#160;static member Run : executionContext:ExecutionContext * callback:ContextCallback * state:obj -&gt; unit<br />&#160;&#160;static member SuppressFlow : unit -&gt; AsyncFlowControl<br /><br />Full name: System.Threading.ExecutionContext</div>
+<div class="tip" id="fs99">System.Threading.ExecutionContext.Run(executionContext: System.Threading.ExecutionContext, callback: System.Threading.ContextCallback, state: obj) : unit</div>
 
         </div>
         <div class="span3">
@@ -309,6 +373,8 @@ redistribution for both commercial and non-commercial purposes. For more informa
           <ul class="nav nav-list" id="menu" style="margin-top: 20px;">
             <li class="nav-header">HttpFs.Auth0</li>
             <li><a href="/HttpFs.Auth0/index.html">Home page</a></li>
+            <li><a href="http://nuget.org/packages/HttpFs.Auth0"><img src="https://img.shields.io/nuget/v/HttpFs.Auth0.svg?maxAge=3600" alt="NuGet"></a></li>
+            <li><a href="https://travis-ci.org/neoeinstein/HttpFs.Auth0"><img src="https://img.shields.io/travis/neoeinstein/HttpFs.Auth0/master.svg?maxAge=3600" alt="Travis branch"></a></li>
             <li class="divider"></li>
             <li><a href="http://nuget.org/packages/HttpFs.Auth0">Get Library via NuGet</a></li>
             <li><a href="https://github.com/neoeinstein/HttpFs.Auth0">Source Code on GitHub</a></li>
