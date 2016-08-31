@@ -2,9 +2,10 @@ namespace HttpFs.Auth0
 
 open Chiron
 open Hopac
+open Hopac.Infixes
 open Hopac.Plus.Collections
 open HttpFs.Client
-#if LOGGING
+#if LOG
 open HttpFs.Logging
 open HttpFs.Logging.Message
 #endif
@@ -225,22 +226,31 @@ module Logging =
   type SW = System.Diagnostics.Stopwatch
   let TicksPerUs = SW.Frequency / 1000000L
 
-#if LOGGING
+#if LOG
   let timeJob (doLog : Message -> unit) (xJ : Job<'x>) =  job {
     let sw = SW.StartNew()
     let! x = xJ
     doLog ^ gauge (sw.ElapsedTicks / TicksPerUs) "µs"
     return x
   }
+
+  let timeAlt (doLog : Message -> unit) (doLogNack: Message -> unit) (xA : Alt<'a>) : Alt<'a> =
+    Alt.withNackJob ^ fun nack ->
+      let outCh = Ch ()
+      let doAlt = job {
+        let sw = SW.StartNew()
+        do! nack ^-> fun () -> doLogNack ^ gauge (sw.ElapsedTicks / TicksPerUs) "µs"
+        <|> xA   ^=> fun x  -> let et = sw.ElapsedTicks in outCh *<- x >>- fun () -> doLog ^ gauge (et / TicksPerUs) "µs"
+      }
+      Job.queue doAlt >>-. outCh
 #else
   let timeJob _ xJ = xJ
+  let timeAlt _ _ xA = xA
 #endif
 
 module Authentication =
-#if LOGGING
+#if LOG
   let logger = Log.createHiera [| "HttpFs"; "Auth0"; "Authentication" |]
-  let respHostLogger (uri : System.Uri) = Log.createHiera [| "HttpFs"; "Auth0"; "Authentication"; "responseTime"; String.replace "." "_" uri.Host |]
-  let respPathLogger (uri : System.Uri) = Log.createHiera [| "HttpFs"; "Auth0"; "Authentication"; "responseTime"; String.replace "." "_" uri.Host; String.replace "." "_" uri.AbsolutePath |]
 #endif
 
   type AuthenticationResult =
@@ -294,7 +304,7 @@ module Authentication =
     |> Request.bodyString (a0reqBody |> Json.serialize |> Json.format)
 
   let extractAuthResult (resp : Response) : Job<AuthenticationResult> = job {
-#if LOGGING
+#if LOG
     event Verbose "Reading authentication response"
     |> logger.logSimple
 #endif
@@ -303,7 +313,7 @@ module Authentication =
     return
       match bStrC with
       | Choice1Of2 bStr ->
-#if LOGGING
+#if LOG
         event Verbose "Read authentication response"
         |> setField "length" ^ String.length bStr
         |> logger.logSimple
@@ -314,7 +324,7 @@ module Authentication =
           |> Choice.bind Json.tryDeserialize
         match arC with
         | Choice1Of2 ar ->
-#if LOGGING
+#if LOG
           logger.log Debug ^ fun _ ->
             match ar with
             | AuthOk _ ->
@@ -326,7 +336,7 @@ module Authentication =
 
           ar
         | Choice2Of2 err ->
-#if LOGGING
+#if LOG
           event Warn "Error while trying to deserialize authentication response"
           |> setField "error" err
           |> logger.logSimple
@@ -334,7 +344,7 @@ module Authentication =
 
           AuthFail ^ DeserializationError err
       | Choice2Of2 ex ->
-#if LOGGING
+#if LOG
         event Warn "Error while trying to read authentication response"
         |> addExn ex
         |> logger.logSimple
@@ -353,8 +363,10 @@ module Authentication =
       return Choice2Of2 y
   }
 
+  let deDot = String.replace "." "_"
+
   let logResponse (r : Response) : unit =
-#if LOGGING
+#if LOG
     let logLevel =
       match r.statusCode with
       | x when x >= 200 && x < 300 -> Debug
@@ -364,66 +376,91 @@ module Authentication =
     logger.log logLevel ^ fun ll ->
       event ll "Received response from authentication API {url} with status code {statusCode}"
       |> setField "statusCode" r.statusCode
-      |> setField "url" r.responseUri
+      |> setField "url" ^ string r.responseUri
 #else
     ()
 #endif
 
-  let logResponseTime uri msg =
-#if LOGGING
-    msg |> (respHostLogger uri).logSimple
-    msg |> (respPathLogger uri).logSimple
+  let logResponseTime (uri : System.Uri) msg =
+#if LOG
+    let logger = Log.createHiera [| "HttpFs"; "Auth0"; "Authentication"; "tryAuthenticate"; "responseTime" |]
+    let loggerHost = Log.createHiera [| "HttpFs"; "Auth0"; "Authentication"; "tryAuthenticate"; "responseTime"; deDot uri.Host |]
+    let loggerPath = Log.createHiera [| "HttpFs"; "Auth0"; "Authentication"; "tryAuthenticate"; "responseTime"; deDot uri.Host; deDot uri.AbsolutePath |]
+    msg |> logger.logSimple
+    msg |> loggerHost.logSimple
+    msg |> loggerPath.logSimple
+#else
+    ()
+#endif
+
+  let logNack (uri : System.Uri) msg =
+#if LOG
+    let logger = Log.createHiera [| "HttpFs"; "Auth0"; "Authentication"; "tryAuthenticate"; "cancelled" |]
+    let loggerHost = Log.createHiera [| "HttpFs"; "Auth0"; "Authentication"; "tryAuthenticate"; "cancelled"; deDot uri.Host |]
+    let loggerPath = Log.createHiera [| "HttpFs"; "Auth0"; "Authentication"; "tryAuthenticate"; "cancelled"; deDot uri.Host; deDot uri.AbsolutePath |]
+    msg |> logger.logSimple
+    msg |> loggerHost.logSimple
+    msg |> loggerPath.logSimple
 #else
     ()
 #endif
 
   let tryAuthenticate (req : Request) : Alt<AuthenticationResult> =
-    Alt.prepare ^ job {
-#if LOGGING
+    Alt.withNackJob ^ fun nack ->
+      let outCh = Ch ()
+      let doAlt = job {
+#if LOG
       event Debug "Attempting to authenticate with {url}"
-      |> setField "url" req.url
+        |> setField "url" ^ string req.url
       |> logger.logSimple
 #endif
 
-      let! rC =
+        let respA =
         tryGetResponse req
-        |> Logging.timeJob ^ logResponseTime req.url
+          |> Logging.timeAlt (logResponseTime req.url) (logNack req.url)
+
+        let! rC =
+              nack ^=>. Alt.never ()
+          <|> respA
 
       match rC with
       | Choice1Of2 r ->
         use r = r
         logResponse r
         let! ar = extractAuthResult r
-        return Alt.always ar
+          do! outCh *<- ar
       | Choice2Of2 ex ->
           match ex with
           | :? System.Net.WebException as exn when exn.Status = System.Net.WebExceptionStatus.Timeout ->
-#if LOGGING
+#if LOG
             event Info "Authentication request timed out after {timeout} milliseconds"
             |> setField "timeout" req.timeout
             |> logger.logSimple
 #endif
 
-            return Alt.always ^ AuthFail OperationTimedOut
+              do! outCh *<- AuthFail OperationTimedOut
           | ex ->
-#if LOGGING
+#if LOG
             event Info "Authentication request failed with an exception"
             |> addExn ex
             |> logger.logSimple
 #endif
 
-            return Alt.always ^ AuthFail ^ Auth0ApiFailure.ApiException ex
+              do! outCh *<- (AuthFail ^ Auth0ApiFailure.ApiException ex)
     }
+      Job.queue doAlt >>-. outCh
 
-#if LOGGING
-  let credSourceLog = Log.createHiera [|"HttpFs"; "Auth0"; "Authorization"; "retrieveCredentials" |]
+#if LOG
+  let credSourceLog = Log.createHiera [|"HttpFs"; "Auth0"; "Authentication"; "retrieveCredentials" |]
 #endif
 
   let tryAuthenticateFromSource (u2cp2acOJ : System.Uri -> ClientParams -> #Job<Auth0Credentials option>) (uri : System.Uri) (cp : ClientParams) : Alt<_> =
-    Alt.prepare ^ job {
-#if LOGGING
+    Alt.withNackJob ^ fun nack ->
+      let outCh = Ch ()
+      let doAlt : Job<unit> = job {
+#if LOG
       event Verbose "Attempting to retrieve credentials for {resourceUri} with {clientParams}"
-      |> setField "resourceUri" uri
+        |> setField "resourceUri" ^ string uri
       |> setField "clientParams" cp
       |> logger.logSimple
 #endif
@@ -431,9 +468,9 @@ module Authentication =
       let! acO =
         asJob ^ u2cp2acOJ uri cp
         |> Logging.timeJob ^ fun msg ->
-#if LOGGING
+#if LOG
           msg
-          |> setField "resourceUri" uri
+            |> setField "resourceUri" ^ string uri
           |> setField "clientParams" cp
           |> credSourceLog.logSimple
 #else
@@ -442,24 +479,26 @@ module Authentication =
 
       match acO with
       | Some ac ->
-#if LOGGING
+#if LOG
         event Debug "Found credentials for {resourceUri} with {clientParams}"
-        |> setField "resourceUri" uri
+          |> setField "resourceUri" ^ string uri
         |> setField "clientParams" cp
         |> logger.logSimple
 #endif
 
-        return tryAuthenticate ^ createRequest cp ac
+          do! nack ^=>. Alt.never ()
+          <|> tryAuthenticate (createRequest cp ac) ^=> Ch.give outCh
       | None ->
-#if LOGGING
+#if LOG
         event Info "Unable to find credentials for {resourceUri} with {clientParams}"
-        |> setField "resourceUri" uri
+          |> setField "resourceUri" ^ string uri
         |> setField "clientParams" cp
         |> logger.logSimple
 #endif
 
-        return Alt.always ^ AuthFail NoCredentials
+          do! outCh *<- AuthFail NoCredentials
     }
+      Job.queue doAlt >>-. outCh
 
 
 module WwwAuthenticate =
@@ -494,11 +533,9 @@ module WwwAuthenticate =
     >> Option.map snd
 
 module Auth0Client =
-#if LOGGING
+#if LOG
   let logger = Log.createHiera [| "HttpFs"; "Auth0"; "Auth0Client" |]
   let tokenSourceLog = Log.createHiera [| "HttpFs"; "Auth0"; "Auth0Client"; "retrieveToken" |]
-  let respHostLogger (uri : System.Uri) = Log.createHiera [| "HttpFs"; "Auth0"; "Auth0Client"; "responseTime"; String.replace "." "_" uri.Host |]
-  let respPathLogger (uri : System.Uri) = Log.createHiera [| "HttpFs"; "Auth0"; "Auth0Client"; "responseTime"; String.replace "." "_" uri.Host; String.replace "." "_" uri.AbsolutePath |]
 #endif
 
   let splitKeyValuePair s =
@@ -537,9 +574,9 @@ module Auth0Client =
     addAuth0TokenHeaderImpl t r
 
   let tryGetAuth0TokenWithLogging (u2cp2atOJ: System.Uri -> ClientParams -> #Job<Auth0Token option>) (uri : System.Uri) (cp : ClientParams) = job {
-#if LOGGING
+#if LOG
       event Verbose "Attempting to retrieve authentication token for {resourceUri} with {clientParams}"
-      |> setField "resourceUri" uri
+      |> setField "resourceUri" ^ string uri
       |> setField "clientParams" cp
       |> logger.logSimple
 #endif
@@ -547,20 +584,20 @@ module Auth0Client =
       let! atO =
         asJob ^ u2cp2atOJ uri cp
         |> Logging.timeJob ^ fun msg ->
-#if LOGGING
+#if LOG
           msg
-          |> setField "resourceUri" uri
+          |> setField "resourceUri" ^ string uri
           |> setField "clientParams" cp
           |> tokenSourceLog.logSimple
 #else
           ()
 #endif
 
-#if LOGGING
+#if LOG
       match atO with
       | Some _ ->
         event Debug "Found authentication token for {resourceUri} with {clientParams}"
-        |> setField "resourceUri" uri
+        |> setField "resourceUri" ^ string uri
         |> setField "clientParams" cp
         |> logger.logSimple
 
@@ -574,61 +611,55 @@ module Auth0Client =
       return atO
   }
 
-  let addAuth0TokenHeaderFromSource (u2cp2atOJ: System.Uri -> ClientParams -> #Job<Auth0Token option>) cp req =
-    Alt.prepare ^ job {
+  let addAuth0TokenHeaderFromSource (u2cp2atOJ: System.Uri -> ClientParams -> #Job<Auth0Token option>) cp req = job {
       let! atO = tryGetAuth0TokenWithLogging u2cp2atOJ req.url cp
       match atO with
       | Some at ->
         let setHeader = Request.setHeader ^ Authorization ^ Auth0Token.toHttpAuthorizationHeaderString at
-        return Alt.always ^ setHeader req
+        return setHeader req
       | None ->
-        return Alt.always req
+        return req
     }
-
-  let logResponseTime uri msg =
-#if LOGGING
-    msg |> (respHostLogger uri).logSimple
-    msg |> (respPathLogger uri).logSimple
-#else
-    ()
-#endif
 
   let tryGetResponseWithAuthSource (u2cp2atOJ : System.Uri -> ClientParams -> #Job<Auth0Token option>) cp req =
-    Alt.prepare ^ job {
+    Alt.withNackJob ^ fun nack ->
+      let outCh = Ch ()
+      let doAlt : Job<unit> = job {
       let! atO = tryGetAuth0TokenWithLogging u2cp2atOJ req.url cp
       let req1 = Option.fold (flip addAuth0TokenHeader) req atO
-      let! respC =
-        tryGetResponse req1
-        |> Logging.timeJob ^ logResponseTime req.url
-      return Alt.always respC
+
+        do! nack ^=>. Alt.never ()
+        <|> tryGetResponse req1 ^=> Ch.give outCh
     }
+      Job.queue doAlt >>-. outCh
 
   let tryWithRetryOnAuthRequired (u2cp2atOJ : System.Uri -> ClientParams -> #Job<Auth0Token option>) req (respCJ : #Job<_>) =
-    Alt.prepare ^ job {
-#if LOGGING
+    Alt.withNackJob ^ fun nack ->
+      let outCh = Ch ()
+      let doAlt : Job<unit> = job {
+#if LOG
       event Verbose "Requesting resource {resourceUri}"
-      |> setField "resourceUri" req.url
+        |> setField "resourceUri" ^ string req.url
       |> logger.logSimple
 #endif
 
-      let! respC =
-        asJob ^ respCJ
-        |> Logging.timeJob ^ logResponseTime req.url
+        let! respC = asJob ^ respCJ
 
       match respC with
       | Choice1Of2 (HttpStatus 401 & HasAuth0WwwAuthenticate cp as resp) ->
-#if LOGGING
+#if LOG
         event Info "Received a 401 from {resourceUri} and found Auth0 client parameters; will attempt to retry with token"
         |> setField "clientParams" cp
-        |> setField "resourceUri" req.url
+          |> setField "resourceUri" ^ string req.url
         |> logger.logSimple
 #endif
         (resp :> System.IDisposable).Dispose()
-        let! retryC = tryGetResponseWithAuthSource u2cp2atOJ cp req
-        return Alt.always retryC
+          do! nack ^=>. Alt.never ()
+          <|> tryGetResponseWithAuthSource u2cp2atOJ cp req ^=> Ch.give outCh
       | _ ->
-        return Alt.always respC
+          do! outCh *<- respC
     }
+      Job.queue doAlt >>-. outCh
 
   let tryGetResponseWithRetryOnAuthRequired (u2cp2atOJ : System.Uri -> ClientParams -> #Job<Auth0Token option>) req =
     tryGetResponse req
@@ -667,12 +698,12 @@ type TokenCacheEntry =
     Expiration : int64
   }
 and TokenCacheValue =
-  | Responsive of Auth0Token
-  | Unresponsive of Auth0ApiFailure
+  | Responsive of t:Auth0Token
+  | Unresponsive of f:Auth0ApiFailure
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module TokenCacheEntry =
-#if LOGGING
+#if LOG
   let logger = Log.createHiera [| "HttpFs"; "Auth0"; "TokenCache" |]
 #endif
 
@@ -708,7 +739,7 @@ module TokenCacheEntry =
     memo ^ job {
       match tcePO with
       | None ->
-#if LOGGING
+#if LOG
         event Verbose "Cache miss for {clientParams}"
         |> setField "clientParams" cp
         |> logger.logSimple
@@ -716,7 +747,7 @@ module TokenCacheEntry =
 
         return None
       | Some tceP ->
-#if LOGGING
+#if LOG
         event Verbose "Cache hit for {clientParams}"
         |> setField "clientParams" cp
         |> logger.logSimple
@@ -728,7 +759,7 @@ module TokenCacheEntry =
         | Some tcv ->
           return valueToChoice tcv |> Option.ofChoice
         | None ->
-#if LOGGING
+#if LOG
           event Verbose "Cache expired for {clientParams}"
           |> setField "clientParams" cp
           |> logger.logSimple
@@ -745,7 +776,7 @@ type TokenCache =
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module TokenCache =
-#if LOGGING
+#if LOG
   let logger = Log.createHiera [| "HttpFs"; "Auth0"; "TokenCache" |]
 #endif
 
@@ -759,27 +790,25 @@ module TokenCache =
   let putAuthenticationResult cep (TC sm) cp ar =
     SharedMap.add cp (memo ^ TokenCacheEntry.ofAuthResultJob cep ar) sm
 
-  let tryGetEntry (TC sm) cp =
-    Alt.prepare ^ job {
+  let tryGetEntry (TC sm) cp = job {
       let! m = SharedMap.freeze sm
       let tcePO = Map.tryFind cp m
       match tcePO with
       | None ->
-        return Alt.always None
+        return None
       | Some tceP ->
         let! tce = Promise.read tceP
-        return Alt.always ^ Some ^ TokenCacheEntry.valueToChoice tce.Value
+        return Some tce
     }
 
-  let tryGetToken cep (TC sm) cp =
-    Alt.prepare ^ job {
+  let tryGetToken cep (TC sm) cp = job {
       let! m = SharedMap.freeze sm
       let tcePO = Map.tryFind cp m
-      return TokenCacheEntry.tryGetResponsiveValue' cep cp tcePO
+      return! TokenCacheEntry.tryGetResponsiveValue' cep cp tcePO
     }
 
   let logAuthResultTime cp msg =
-#if LOGGING
+#if LOG
     msg
     |> setField "clientParams" cp
     |> logger.logSimple
@@ -787,14 +816,13 @@ module TokenCache =
     ()
 #endif
 
-  let tryGetTokenWithFill cep (cp2arJ : ClientParams -> #Job<Authentication.AuthenticationResult>) ((TC sm) as tc) cp : Alt<Auth0Token option> =
-    Alt.prepare ^ job {
+  let tryGetTokenWithFill cep (cp2arJ : ClientParams -> #Job<Authentication.AuthenticationResult>) ((TC sm) as tc) cp : Job<Auth0Token option> = job {
       let! tO = tryGetToken cep tc cp
       match tO with
       | Some t ->
-        return Alt.always ^ Some t
+        return Some t
       | None ->
-#if LOGGING
+#if LOG
         event Debug "Cache has no reponsive entry for {clientParams}; Attempting to authenticate"
         |> setField "clientParams" cp
         |> logger.logSimple
@@ -806,5 +834,5 @@ module TokenCache =
           |> Job.bind ^ TokenCacheEntry.ofAuthResultJob cep
           |> memo
         do! Job.start ^ SharedMap.add cp tceP sm
-        return asAlt ^ TokenCacheEntry.tryGetResponsiveValue' cep cp ^ Some tceP
+        return! TokenCacheEntry.tryGetResponsiveValue' cep cp ^ Some tceP
     }

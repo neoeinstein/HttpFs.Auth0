@@ -245,8 +245,7 @@ module Auth0Client =
          ats : (Uri -> ClientParams -> #Job<Auth0Token option>)
       -> cp  : ClientParams
       -> req : Request
-      -> Alt<Request>
-
+      -> Job<Request>
 
   /// Attempts retrieve an Auth0 token from an asynchronous source, adding it
   /// to the request if available and then processes the request.
@@ -300,6 +299,20 @@ module CacheExpirationParameters =
       -> MaxAgeOnFailure : int64
       -> CacheExpirationParameters
 
+/// Represents an entry in the `TokenCache`
+type TokenCacheEntry =
+  { /// The value that was cached
+    Value      : TokenCacheValue
+    /// The time at which the cached value will expire
+    Expiration : int64
+  }
+/// Represents the cached entry
+and TokenCacheValue =
+  /// Represents a cached token
+  | Responsive of   t:Auth0Token
+  /// Represents a cached failure
+  | Unresponsive of f:Auth0ApiFailure
+
 /// Represents a cache associating Auth0 authentication tokens with a `ClientParams`
 type TokenCache
 
@@ -330,14 +343,14 @@ module TokenCache =
   val tryGetEntry:
          tc : TokenCache
       -> cp : ClientParams
-      -> Alt<Choice<Auth0Token,Auth0ApiFailure> option>
+      -> Job<TokenCacheEntry option>
 
   /// Attempts to get an unexpired Auth0 authentication token from the cache.
   val tryGetToken:
          cep : CacheExpirationParameters
       -> tc  : TokenCache
       -> cp  : ClientParams
-      -> Alt<Auth0Token option>
+      -> Job<Auth0Token option>
 
   /// Attempts to get an unexpired Auth0 authentication token from the cache. If the
   /// token is expired or doesn't exist in the cache, gets an authentication result
@@ -349,4 +362,4 @@ module TokenCache =
       -> cp2arJ : (ClientParams -> #Job<Authentication.AuthenticationResult>)
       -> tc     : TokenCache
       -> cp     : ClientParams
-      -> Alt<Auth0Token option>
+      -> Job<Auth0Token option>
