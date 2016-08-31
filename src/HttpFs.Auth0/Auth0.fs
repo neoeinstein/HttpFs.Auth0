@@ -414,34 +414,38 @@ module Authentication =
       let outCh = Ch ()
       let doAlt : Job<unit> = job {
         logger.log Verbose
-          ( eventX "Attempting to retrieve credentials for {resourceUri} with {clientParams}"
+          ( eventX "Attempting to retrieve credentials for {resourceUri} with {authenticationHost}:{clientId}"
             >> setField "resourceUri" ^ string uri
-            >> setField "clientParams" cp
+            >> setField "authenticationHost" cp.AuthenticationHost
+            >> setField "clientId" ^ string cp.ClientId
           )
 
         let! acO =
           asJob ^ u2cp2acOJ uri cp
           |> Logging.timeJob
             (    setField "resourceUri" ^ string uri
-              >> setField "clientParams" cp
+              >> setField "authenticationHost" cp.AuthenticationHost
+              >> setField "clientId" ^ string cp.ClientId
               >> credSourceLog.logSimple
             )
 
         match acO with
         | Some ac ->
           logger.log Debug
-            ( eventX "Found credentials for {resourceUri} with {clientParams}"
+            ( eventX "Found credentials for {resourceUri} with {authenticationHost}:{clientId}"
               >> setField "resourceUri" ^ string uri
-              >> setField "clientParams" cp
+              >> setField "authenticationHost" cp.AuthenticationHost
+              >> setField "clientId" ^ string cp.ClientId
             )
 
           return!
                 nack ^=>. Alt.never
             <|> tryAuthenticate (createRequest cp ac) ^=> Ch.give outCh
         | None ->
-          event Info "Unable to find credentials for {resourceUri} with {clientParams}"
+          event Info "Unable to find credentials for {resourceUri} with {authenticationHost}:{clientId}"
           |> setField "resourceUri" ^ string uri
-          |> setField "clientParams" cp
+          |> setField "authenticationHost" cp.AuthenticationHost
+          |> setField "clientId" ^ string cp.ClientId
           |> logger.logSimple
 
           return! outCh *<- AuthFail NoCredentials
@@ -521,32 +525,36 @@ module Auth0Client =
 
   let tryGetAuth0TokenWithLogging (u2cp2atOJ: System.Uri -> ClientParams -> #Job<Auth0Token option>) (uri : System.Uri) (cp : ClientParams) = job {
       logger.log Verbose
-        ( eventX "Attempting to retrieve authentication token for {resourceUri} with {clientParams}"
+        ( eventX "Attempting to retrieve authentication token for {resourceUri} with {authenticationHost}:{clientId}"
           >> setField "resourceUri" ^ string uri
-          >> setField "clientParams" cp
+          >> setField "authenticationHost" cp.AuthenticationHost
+          >> setField "clientId" ^ string cp.ClientId
         )
 
       let! atO =
         asJob ^ u2cp2atOJ uri cp
         |> Logging.timeJob
           (    setField "resourceUri" ^ string uri
-            >> setField "clientParams" cp
+            >> setField "authenticationHost" cp.AuthenticationHost
+            >> setField "clientId" ^ string cp.ClientId
             >> tokenSourceLog.logSimple
           )
 
       match atO with
       | Some _ ->
         logger.log Verbose
-          ( eventX "Found authentication token for {resourceUri} with {clientParams}"
+          ( eventX "Found authentication token for {resourceUri} with {authenticationHost}:{clientId}"
             >> setField "resourceUri" ^ string uri
-            >> setField "clientParams" cp
+            >> setField "authenticationHost" cp.AuthenticationHost
+            >> setField "clientId" ^ string cp.ClientId
           )
 
       | None ->
         logger.log Warn
-          ( eventX "Unable to find credentials for {resourceUri} with {clientParams}"
+          ( eventX "Unable to find credentials for {resourceUri} with {authenticationHost}:{clientId}"
             >> setField "resourceUri" ^ string uri
-            >> setField "clientParams" cp
+            >> setField "authenticationHost" cp.AuthenticationHost
+            >> setField "clientId" ^ string cp.ClientId
           )
 
       return atO
@@ -588,7 +596,8 @@ module Auth0Client =
         match respC with
         | Choice1Of2 (HttpStatus 401 & HasAuth0WwwAuthenticate cp as resp) ->
           event Info "Received a 401 from {resourceUri} and found Auth0 client parameters; will attempt to retry with token"
-          |> setField "clientParams" cp
+          |> setField "authenticationHost" cp.AuthenticationHost
+          |> setField "clientId" ^ string cp.ClientId
           |> setField "resourceUri" ^ string req.url
           |> logger.logSimple
 
