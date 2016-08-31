@@ -332,11 +332,11 @@ module TokenCache =
 
   /// Processes an authentication result, caching the value for a particular client
   /// using the cache expiration parameters provided.
-  val putAuthenticationResult:
+  val putAuthenticationResultJob:
          cep : CacheExpirationParameters
       -> tc  : TokenCache
       -> cp  : ClientParams
-      -> ar  : Authentication.AuthenticationResult
+      -> arJ : Job<Authentication.AuthenticationResult>
       -> Alt<unit>
 
   /// Attempts to get an Auth0 authentication result from the cache. Does not check the expiration of the returned value.

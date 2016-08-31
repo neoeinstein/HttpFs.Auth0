@@ -4,6 +4,7 @@ open Chiron
 open Hopac
 open Hopac.Infixes
 open Hopac.Plus.Collections
+open Hopac.Plus.Extensions
 open HttpFs.Client
 #if LOG
 open HttpFs.Logging
@@ -227,22 +228,14 @@ module Logging =
   let TicksPerUs = SW.Frequency / 1000000L
 
 #if LOG
-  let timeJob (doLog : Message -> unit) (xJ : Job<'x>) =  job {
-    let sw = SW.StartNew()
-    let! x = xJ
-    doLog ^ gauge (sw.ElapsedTicks / TicksPerUs) "µs"
-    return x
-  }
+  let stopwatchToMessage (swTicks : Hopac.Plus.Extensions.StopwatchTicks) =
+    gauge (StopwatchTicks.toMicroseconds swTicks) "µs"
+
+  let timeJob (doLog : Message -> unit) (xJ : Job<'x>) =
+    Job.timeFun (stopwatchToMessage >> doLog) xJ
 
   let timeAlt (doLog : Message -> unit) (doLogNack: Message -> unit) (xA : Alt<'a>) : Alt<'a> =
-    Alt.withNackJob ^ fun nack ->
-      let outCh = Ch ()
-      let doAlt = job {
-        let sw = SW.StartNew()
-        do! nack ^-> fun () -> doLogNack ^ gauge (sw.ElapsedTicks / TicksPerUs) "µs"
-        <|> xA   ^=> fun x  -> let et = sw.ElapsedTicks in outCh *<- x >>- fun () -> doLog ^ gauge (et / TicksPerUs) "µs"
-      }
-      Job.queue doAlt >>-. outCh
+    Alt.timeFun (stopwatchToMessage >> doLog) (stopwatchToMessage >> doLogNack) xA
 #else
   let timeJob _ xJ = xJ
   let timeAlt _ _ xA = xA
@@ -410,44 +403,44 @@ module Authentication =
       let outCh = Ch ()
       let doAlt = job {
 #if LOG
-      event Debug "Attempting to authenticate with {url}"
+        event Debug "Attempting to authenticate with {url}"
         |> setField "url" ^ string req.url
-      |> logger.logSimple
+        |> logger.logSimple
 #endif
 
         let respA =
-        tryGetResponse req
+          tryGetResponse req
           |> Logging.timeAlt (logResponseTime req.url) (logNack req.url)
 
         let! rC =
-              nack ^=>. Alt.never ()
+              nack ^=>. Alt.never
           <|> respA
 
-      match rC with
-      | Choice1Of2 r ->
-        use r = r
-        logResponse r
-        let! ar = extractAuthResult r
-          do! outCh *<- ar
-      | Choice2Of2 ex ->
-          match ex with
-          | :? System.Net.WebException as exn when exn.Status = System.Net.WebExceptionStatus.Timeout ->
+        match rC with
+        | Choice1Of2 r ->
+          use r = r
+          logResponse r
+          let! ar = extractAuthResult r
+          return! outCh *<- ar
+        | Choice2Of2 ex ->
+            match ex with
+            | :? System.Net.WebException as exn when exn.Status = System.Net.WebExceptionStatus.Timeout ->
 #if LOG
-            event Info "Authentication request timed out after {timeout} milliseconds"
-            |> setField "timeout" req.timeout
-            |> logger.logSimple
+              event Info "Authentication request timed out after {timeout} milliseconds"
+              |> setField "timeout" req.timeout
+              |> logger.logSimple
 #endif
 
-              do! outCh *<- AuthFail OperationTimedOut
-          | ex ->
+              return! outCh *<- AuthFail OperationTimedOut
+            | ex ->
 #if LOG
-            event Info "Authentication request failed with an exception"
-            |> addExn ex
-            |> logger.logSimple
+              event Info "Authentication request failed with an exception"
+              |> addExn ex
+              |> logger.logSimple
 #endif
 
-              do! outCh *<- (AuthFail ^ Auth0ApiFailure.ApiException ex)
-    }
+              return! outCh *<- (AuthFail ^ Auth0ApiFailure.ApiException ex)
+      }
       Job.queue doAlt >>-. outCh
 
 #if LOG
@@ -459,45 +452,46 @@ module Authentication =
       let outCh = Ch ()
       let doAlt : Job<unit> = job {
 #if LOG
-      event Verbose "Attempting to retrieve credentials for {resourceUri} with {clientParams}"
+        event Verbose "Attempting to retrieve credentials for {resourceUri} with {clientParams}"
         |> setField "resourceUri" ^ string uri
-      |> setField "clientParams" cp
-      |> logger.logSimple
+        |> setField "clientParams" cp
+        |> logger.logSimple
 #endif
 
-      let! acO =
-        asJob ^ u2cp2acOJ uri cp
-        |> Logging.timeJob ^ fun msg ->
+        let! acO =
+          asJob ^ u2cp2acOJ uri cp
+          |> Logging.timeJob ^ fun msg ->
 #if LOG
-          msg
+            msg
             |> setField "resourceUri" ^ string uri
-          |> setField "clientParams" cp
-          |> credSourceLog.logSimple
+            |> setField "clientParams" cp
+            |> credSourceLog.logSimple
 #else
-          ()
+            ()
 #endif
 
-      match acO with
-      | Some ac ->
+        match acO with
+        | Some ac ->
 #if LOG
-        event Debug "Found credentials for {resourceUri} with {clientParams}"
+          event Debug "Found credentials for {resourceUri} with {clientParams}"
           |> setField "resourceUri" ^ string uri
-        |> setField "clientParams" cp
-        |> logger.logSimple
+          |> setField "clientParams" cp
+          |> logger.logSimple
 #endif
 
-          do! nack ^=>. Alt.never ()
-          <|> tryAuthenticate (createRequest cp ac) ^=> Ch.give outCh
-      | None ->
+          return!
+                nack ^=>. Alt.never
+            <|> tryAuthenticate (createRequest cp ac) ^=> Ch.give outCh
+        | None ->
 #if LOG
-        event Info "Unable to find credentials for {resourceUri} with {clientParams}"
+          event Info "Unable to find credentials for {resourceUri} with {clientParams}"
           |> setField "resourceUri" ^ string uri
-        |> setField "clientParams" cp
-        |> logger.logSimple
+          |> setField "clientParams" cp
+          |> logger.logSimple
 #endif
 
-          do! outCh *<- AuthFail NoCredentials
-    }
+          return! outCh *<- AuthFail NoCredentials
+      }
       Job.queue doAlt >>-. outCh
 
 
@@ -625,12 +619,13 @@ module Auth0Client =
     Alt.withNackJob ^ fun nack ->
       let outCh = Ch ()
       let doAlt : Job<unit> = job {
-      let! atO = tryGetAuth0TokenWithLogging u2cp2atOJ req.url cp
-      let req1 = Option.fold (flip addAuth0TokenHeader) req atO
+        let! atO = tryGetAuth0TokenWithLogging u2cp2atOJ req.url cp
+        let req1 = Option.fold (flip addAuth0TokenHeader) req atO
 
-        do! nack ^=>. Alt.never ()
-        <|> tryGetResponse req1 ^=> Ch.give outCh
-    }
+        return!
+              nack ^=>. Alt.never
+          <|> tryGetResponse req1 ^=> Ch.give outCh
+      }
       Job.queue doAlt >>-. outCh
 
   let tryWithRetryOnAuthRequired (u2cp2atOJ : System.Uri -> ClientParams -> #Job<Auth0Token option>) req (respCJ : #Job<_>) =
@@ -638,27 +633,27 @@ module Auth0Client =
       let outCh = Ch ()
       let doAlt : Job<unit> = job {
 #if LOG
-      event Verbose "Requesting resource {resourceUri}"
+        event Verbose "Requesting resource {resourceUri}"
         |> setField "resourceUri" ^ string req.url
-      |> logger.logSimple
+        |> logger.logSimple
 #endif
 
         let! respC = asJob ^ respCJ
 
-      match respC with
-      | Choice1Of2 (HttpStatus 401 & HasAuth0WwwAuthenticate cp as resp) ->
+        match respC with
+        | Choice1Of2 (HttpStatus 401 & HasAuth0WwwAuthenticate cp as resp) ->
 #if LOG
-        event Info "Received a 401 from {resourceUri} and found Auth0 client parameters; will attempt to retry with token"
-        |> setField "clientParams" cp
+          event Info "Received a 401 from {resourceUri} and found Auth0 client parameters; will attempt to retry with token"
+          |> setField "clientParams" cp
           |> setField "resourceUri" ^ string req.url
-        |> logger.logSimple
+          |> logger.logSimple
 #endif
-        (resp :> System.IDisposable).Dispose()
-          do! nack ^=>. Alt.never ()
+          (resp :> System.IDisposable).Dispose()
+          do! nack ^=>. Alt.never
           <|> tryGetResponseWithAuthSource u2cp2atOJ cp req ^=> Ch.give outCh
-      | _ ->
-          do! outCh *<- respC
-    }
+        | _ ->
+          return! outCh *<- respC
+      }
       Job.queue doAlt >>-. outCh
 
   let tryGetResponseWithRetryOnAuthRequired (u2cp2atOJ : System.Uri -> ClientParams -> #Job<Auth0Token option>) req =
@@ -666,15 +661,14 @@ module Auth0Client =
     |> tryWithRetryOnAuthRequired u2cp2atOJ req
 
 type CacheExpirationParameters =
-  { NowJob : Job<int64>
-    DefaultMaxAge : int64
-    TimeoutMaxAge : int64
-    FailureMaxAge : int64
+  { NowJob : Job<SecondsSinceEpoch>
+    DefaultMaxAge : SecondsSinceEpoch
+    TimeoutMaxAge : SecondsSinceEpoch
+    FailureMaxAge : SecondsSinceEpoch
   }
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module CacheExpirationParameters =
-  let epoch = System.DateTimeOffset(1970, 1, 1, 0, 0, 0, System.TimeSpan.Zero).UtcTicks
   let create getNow defMaxAge toMaxAge failMaxAge =
     { NowJob = getNow
       DefaultMaxAge = defMaxAge
@@ -682,7 +676,7 @@ module CacheExpirationParameters =
       FailureMaxAge = failMaxAge
     }
   let create' defMaxAge toMaxAge failMaxAge =
-    (create ^ Job.result ^ (System.DateTimeOffset.UtcNow.UtcTicks - epoch) / System.TimeSpan.TicksPerSecond) defMaxAge toMaxAge failMaxAge
+    create Clock.getSecondsSinceEpoch defMaxAge toMaxAge failMaxAge
 
   let mustNotExpireInNextSeconds cep s = fun v exp -> job {
     let! now = cep.NowJob
@@ -720,7 +714,8 @@ module TokenCacheEntry =
     | Authentication.AuthFail f ->
       { Value = Unresponsive f; Expiration = failureMaxAge }
 
-  let ofAuthResultJob cep ar = job {
+  let ofAuthResultJob cep arJ = job {
+    let! ar = asJob arJ
     let! now = cep.NowJob
     return ofAuthResult (now + cep.DefaultMaxAge) (now + cep.TimeoutMaxAge) (now + cep.FailureMaxAge) ar
   }
@@ -787,8 +782,11 @@ module TokenCache =
   let putToken (TC sm) cp at exp =
     SharedMap.add cp (Promise { Value = Responsive at; Expiration = exp }) sm
 
-  let putAuthenticationResult cep (TC sm) cp ar =
-    SharedMap.add cp (memo ^ TokenCacheEntry.ofAuthResultJob cep ar) sm
+  let putAuthenticationResultJob cep (TC sm) cp arJ =
+    Alt.prepare
+      ( Promise.queue (TokenCacheEntry.ofAuthResultJob cep arJ)
+        >>- fun tceP -> SharedMap.add cp tceP sm
+      )
 
   let tryGetEntry (TC sm) cp = job {
       let! m = SharedMap.freeze sm
@@ -831,7 +829,7 @@ module TokenCache =
         let tceP =
           cp2arJ cp
           |> Logging.timeJob ^ logAuthResultTime cp
-          |> Job.bind ^ TokenCacheEntry.ofAuthResultJob cep
+          |> TokenCacheEntry.ofAuthResultJob cep
           |> memo
         do! Job.start ^ SharedMap.add cp tceP sm
         return! TokenCacheEntry.tryGetResponsiveValue' cep cp ^ Some tceP

@@ -1,3 +1,6 @@
+### 0.1.0-beta005
+* Rework interfaces that returned `Alt`s
+
 ### 0.1.0-beta004
 * Better disposal of consumed responses
 
