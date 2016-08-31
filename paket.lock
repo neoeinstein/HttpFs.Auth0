@@ -8,7 +8,7 @@ NUGET
     FSharp.Core (4.0.0.1) - redirects: force
     Hopac (0.3.13)
       FSharp.Core (>= 3.1.2.5)
-    Hopac.Plus (0.1.2)
+    Hopac.Plus (0.1.3-beta001)
       FSharp.Core (>= 3.1.2.5)
       Hopac (>= 0.3.12 < 0.4)
     Http.fs (4.0.2)
